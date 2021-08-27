@@ -19,6 +19,11 @@ Statistics *stats;			// performance metrics
 Timer *timer;				// the hardware timer device,
 					// for invoking context switches
 
+//Begin code changes by Lucas Blanchard
+//nachOS tweaks from threads video for adding -tt flag
+int numLoops;
+//End code changes by Lucas Blanchard
+
 #ifdef FILESYS_NEEDED
 FileSystem  *fileSystem;
 #endif
@@ -108,6 +113,13 @@ Initialize(int argc, char **argv)
 	    randomYield = TRUE;
 	    argCount = 2;
 	}
+
+    //Begin code changes by Lucas Blanchard
+    else if (!strcmp(*argv, "-tt")){
+        numLoops = atoi(*(argv + 1));
+    }
+    //End code changes by Lucas Blanchard
+
 #ifdef USER_PROGRAM
 	if (!strcmp(*argv, "-s"))
 	    debugUserProg = TRUE;
