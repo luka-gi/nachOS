@@ -12,6 +12,14 @@
 #include "copyright.h"
 #include "system.h"
 
+//Begin code changes by Lucas Blanchard
+//struct for passing multiple data into thread
+typedef struct threadInfo{
+    int id;
+    int nl;
+};
+//End code changes by Lucas Blanchard
+
 //----------------------------------------------------------------------
 // SimpleThread
 // 	Loop 5 times, yielding the CPU to another ready thread 
@@ -21,16 +29,18 @@
 //	purposes.
 //----------------------------------------------------------------------
 
-void
-SimpleThread(int which)
-{
-    int num;
-    
-    for (num = 0; num < 5; num++) {
-	printf("*** thread %d looped %d times\n", which, num);
+//Begin code changes by Lucas Blanchard
+int num = 0;
+
+void SimpleThread(int param){
+    threadInfo* ti = (threadInfo*)param;
+    for(int i = 0; i < ti->nl; i++){
+        num++;
+        printf("Thread %d looped %d times. num is %d\n", ti->id, i, num);
         currentThread->Yield();
     }
 }
+//End code changes by Lucas Blanchard
 
 
 //----------------------------------------------------------------------
@@ -38,14 +48,18 @@ SimpleThread(int which)
 // 	Invoke a test routine.
 //----------------------------------------------------------------------
 
-void
-ThreadTest()
-{
-    DEBUG('t', "Entering ThreadTest");
+//Begin code changes by Lucas Blanchard
+void ThreadTest(){
+    Thread *t1 = new Thread("T 1");
+    Thread *t2 = new Thread("T 2");
 
-    Thread *t = new Thread("forked thread");
+    threadInfo *ti1 = new threadInfo();
+    threadInfo *ti2 = new threadInfo();
 
-    t->Fork(SimpleThread, 1);
-    SimpleThread(0);
+    ti1->id=1;ti2->id=2;
+    ti1->nl=numLoops+1;ti2->nl=numLoops;
+
+    t1->Fork(SimpleThread, (int) ti1);
+    t2->Fork(SimpleThread, (int) ti2);
 }
-
+//End code changes by Lucas Blanchard

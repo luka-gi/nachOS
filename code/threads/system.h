@@ -29,6 +29,10 @@ extern Interrupt *interrupt;			// interrupt status
 extern Statistics *stats;			// performance metrics
 extern Timer *timer;				// the hardware alarm clock
 
+//Begin code changes by Lucas Blanchard
+extern int numLoops;
+//End code changes by Lucas Blanchard
+
 #ifdef USER_PROGRAM
 #include "machine.h"
 extern Machine* machine;	// user program memory and registers
