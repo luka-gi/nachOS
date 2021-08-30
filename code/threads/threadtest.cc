@@ -1,47 +1,69 @@
-// threadtest.cc 
+// threadtest.cc
 //	Simple test case for the threads assignment.
 //
 //	Create two threads, and have them context switch
-//	back and forth between themselves by calling Thread::Yield, 
+//	back and forth between themselves by calling Thread::Yield,
 //	to illustratethe inner workings of the thread system.
 //
 // Copyright (c) 1992-1993,2021 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation 
+// All rights reserved.  See copyright.h for copyright notice and limitation
 // of liability and disclaimer of warranty provisions.
 
 #include "copyright.h"
 #include "system.h"
 
-//Begin code changes by Lucas Blanchard
-//struct for passing multiple data into thread
-typedef struct threadInfo{
-    int id;
-    int nl;
-};
-//End code changes by Lucas Blanchard
+void SimpleThread(int param)
+{
+    int num;
 
-//----------------------------------------------------------------------
-// SimpleThread
-// 	Loop 5 times, yielding the CPU to another ready thread 
-//	each iteration.
-//
-//	"which" is simply a number identifying the thread, for debugging
-//	purposes.
-//----------------------------------------------------------------------
+    for (num = 0; num < 5; num++)
+    {
+        printf("*** thread %d looped %d times\n", param, num);
+        currentThread->Yield();
+    }
+}
 
 //Begin code changes by Lucas Blanchard
-int num = 0;
+void PingPong(int loops)
+{
+    int num;
 
-void SimpleThread(int param){
-    threadInfo* ti = (threadInfo*)param;
-    for(int i = 0; i < ti->nl; i++){
-        num++;
-        printf("Thread %d looped %d times. num is %d\n", ti->id, i, num);
+    for (num = 1; num <= loops; num++)
+    {
+        if (num % 2 != 0)
+        {
+            printf("%s: \"Ping\" looped %d times\n", currentThread->getName(), num);
+        }
+        else
+        {
+            printf("%s: \"Pong\" looped %d times\n", currentThread->getName(), num);
+        }
+        currentThread->Yield();
+    }
+}
+
+void HelloWorld(int loops)
+{
+    int num;
+
+    for (num = 1; num <= loops; num++)
+    {
+        printf("%s: \"Hello World!\" looped %d times\n", currentThread->getName(), num);
+        currentThread->Yield();
+    }
+}
+
+void CountUp(int loops)
+{
+    int num;
+
+    for (num = 1; num <= loops; num++)
+    {
+        printf("%s: \"Count to %d: %d\"\n", currentThread->getName(), loops, num);
         currentThread->Yield();
     }
 }
 //End code changes by Lucas Blanchard
-
 
 //----------------------------------------------------------------------
 // ThreadTest
@@ -49,17 +71,16 @@ void SimpleThread(int param){
 //----------------------------------------------------------------------
 
 //Begin code changes by Lucas Blanchard
-void ThreadTest(){
-    Thread *t1 = new Thread("T 1");
-    Thread *t2 = new Thread("T 2");
+void ThreadTest()
+{
+    Thread *t1, *t2, *t3;
 
-    threadInfo *ti1 = new threadInfo();
-    threadInfo *ti2 = new threadInfo();
+    t1 = new Thread("T_1");
+    t2 = new Thread("T_2");
+    t3 = new Thread("T_3");
 
-    ti1->id=1;ti2->id=2;
-    ti1->nl=numLoops+1;ti2->nl=numLoops;
-
-    t1->Fork(SimpleThread, (int) ti1);
-    t2->Fork(SimpleThread, (int) ti2);
+    t1->Fork(HelloWorld, 3);
+    t2->Fork(PingPong, 4);
+    t3->Fork(CountUp, 5);
 }
 //End code changes by Lucas Blanchard
