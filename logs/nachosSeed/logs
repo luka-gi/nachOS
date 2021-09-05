@@ -1,0 +1,35 @@
+Running nachos 2 times.\n\n
+nachos -rs 10035 -A 10
+*** thread 5 looped 10 times
+*** thread 5 looped 10 times
+*** thread 5 looped 10 times
+*** thread 5 looped 10 times
+*** thread 5 looped 10 times
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 193, idle 113, system 80, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+nachos -rs 3587 -A 10
+*** thread 5 looped 10 times
+*** thread 5 looped 10 times
+*** thread 5 looped 10 times
+*** thread 5 looped 10 times
+*** thread 5 looped 10 times
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 214, idle 114, system 100, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
