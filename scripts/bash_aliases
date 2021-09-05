@@ -1,0 +1,27 @@
+#cd aliases
+alias cdd="cd $HOME/Desktop"
+alias cdn="cd $HOME/Desktop/nachos_linux/nachos-3.4"
+alias cdj="cd $HOME/Desktop/nachos_java/3SH3/nachos"
+alias reboot="echo student | sudo -S reboot"
+alias shutdown="echo student | sudo -S shutdown"
+alias cpaliases="cat $HOME/.bash_aliases > $HOME/Desktop/nachos_linux/nachos-3.4/scripts/bash_aliases;source $HOME/.bash_aliases;"
+alias displayOn="$HOME/Desktop/nachos_linux/nachos-3.4/scripts/displayOn.sh"
+alias displayOff="$HOME/Desktop/nachos_linux/nachos-3.4/scripts/displayOff.sh"
+export PATH=$PATH:$HOME/Desktop/nachos_linux/nachos-3.4/scripts/nachosSeed/bin
+
+#make class aliases
+alias mkn="(cd $HOME/Desktop/nachos_linux/nachos-3.4/code && make clean && make all)"
+
+#necessary additions to path for the next set
+export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-i386
+export ARCHDIR=$HOME/Desktop/nachos_java/3SH3/mips-x86.linux-xgcc
+
+#adding java and ARCHDIR (cross compiling) to path
+export PATH=$PATH:$JAVA_HOME/bin
+#THIS WILL NOT ALLOW C/C++ NACHOS TO COMPILE
+#export PATH=$ARCHDIR:$HOME/Desktop/nachos_java/3SH3/nachos/bin:$PATH
+
+#adding nachos as a command
+export PATH=$PATH:$HOME/Desktop/nachos_java/3SH3/nachos/bin
+export PATH=$PATH:$HOME/Desktop/nachos_linux/nachos-3.4/code/threads
+
