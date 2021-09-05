@@ -30,7 +30,7 @@ extern Statistics *stats;			// performance metrics
 extern Timer *timer;				// the hardware alarm clock
 
 //Begin code changes by Lucas Blanchard
-extern int partNum;
+extern int projTask;
 //End code changes by Lucas Blanchard
 
 #ifdef USER_PROGRAM

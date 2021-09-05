@@ -16,9 +16,9 @@ void SimpleThread(int param)
 {
     int num;
 
-    for (num = 0; num < 5; num++)
+    for (num = 0; num < param; num++)
     {
-        printf("*** thread %d looped %d times\n", param, partNum);
+        printf("*** thread %d looped %d times\n", param, num);
         currentThread->Yield();
     }
 }
@@ -36,7 +36,14 @@ void SimpleThread(int param)
 void ThreadTest()
 {
     Thread *t1 = new Thread("T_1");
-    t1->Fork(SimpleThread, 5);
+    if (projTask == 1)
+    {
+        t1->Fork(SimpleThread, 1);
+    }
+    else if (projTask == 2)
+    {
+        t1->Fork(SimpleThread, 4);
+    }
     currentThread->Finish();
 }
 //End code changes by Lucas Blanchard

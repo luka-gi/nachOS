@@ -20,7 +20,7 @@ Timer *timer;                // the hardware timer device,
                              // for invoking context switches
 
 //Begin code changes by Lucas Blanchard
-int partNum;
+int projTask;
 //End code changes by Lucas Blanchard
 
 #ifdef FILESYS_NEEDED
@@ -118,7 +118,7 @@ void Initialize(int argc, char **argv)
         //Begin code changes by Lucas Blanchard
         else if (!strcmp(*argv, "-A"))
         {
-            partNum = atoi(*(argv + 1));
+            projTask = atoi(*(argv + 1));
         }
         //End code changes by Lucas Blanchard
 
