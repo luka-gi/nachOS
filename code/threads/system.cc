@@ -114,11 +114,14 @@ void Initialize(int argc, char **argv)
             randomYield = TRUE;
             argCount = 2;
         }
-
         //Begin code changes by Lucas Blanchard
         else if (!strcmp(*argv, "-A"))
         {
-            projTask = atoi(*(argv + 1));
+            //segfault occurs if no arguments are passed and accessed anyway
+            if (argc != 1)
+            {
+                projTask = atoi(*(argv + 1));
+            }
         }
         //End code changes by Lucas Blanchard
 
