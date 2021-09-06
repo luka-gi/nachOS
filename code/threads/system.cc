@@ -20,7 +20,7 @@ Timer *timer;                // the hardware timer device,
                              // for invoking context switches
 
 //Begin code changes by Lucas Blanchard
-int projTask;
+int projTask = -1;
 //End code changes by Lucas Blanchard
 
 #ifdef FILESYS_NEEDED
@@ -118,9 +118,16 @@ void Initialize(int argc, char **argv)
         else if (!strcmp(*argv, "-A"))
         {
             //segfault occurs if no arguments are passed and accessed anyway
-            if (argc != 1)
+            //also check if any of the possible entires were valid
+            if (argc != 1 && (atoi(*(argv + 1)) == 1 || atoi(*(argv + 1)) == 2))
             {
                 projTask = atoi(*(argv + 1));
+            }
+            //otherwise, an argument was entered but not a valid option
+            //calling currentThread->Finish() may cause a segfault. projTask is set to -1 and nachos will die on its own.
+            else
+            {
+                printf("\nerror, input provided to the flag -A was invalid\n\n");
             }
         }
         //End code changes by Lucas Blanchard

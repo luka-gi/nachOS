@@ -20,34 +20,51 @@ void inputIdentification(int param)
     char *input = new char[arrSize];
 
     //prompt and capture input
-    printf("enter something with a max size of %d: \n", arrSize);
+    printf("enter something with a max byte size of %d: ", arrSize);
+    //fgets on a large array will be able to handle large inputs, and in the extreme case of overflow will truncate
     fgets(input, arrSize, stdin);
 
-    if (isInteger(input))
+    bool validEntry = false;
+    while (!validEntry)
     {
-        printf("Your input is of the category: Integer");
-    }
-    else if (isDecimal(input))
-    {
-        printf("Your input is of the category: Decimal");
-    }
-    else if (isNegInt(input))
-    {
-        printf("Your input is of the category: Negative Integer");
-    }
-    else if (isNegDec(input))
-    {
-        printf("Your input is of the category: Negative Decimal");
-    }
-    //either newline or single character + newline
-    else if (strlen(input) <= 2)
-    {
-        printf("Your input is of the category: Character");
-    }
-    //if anything else, must be a character string
-    else
-    {
-        printf("Your input is of the category: Character String");
+        if (isInteger(input))
+        {
+            printf("\nYour input is of the category: Nonnegative Integer Number\n\n");
+            printf("input:%s\n", input);
+            validEntry = true;
+        }
+        else if (isDecimal(input))
+        {
+            printf("\nYour input is of the category: Nonnegative Decimal Number\n\n");
+            validEntry = true;
+        }
+        else if (isNegInt(input))
+        {
+            printf("\nYour input is of the category: Negative Integer Number\n\n");
+            validEntry = true;
+        }
+        else if (isNegDec(input))
+        {
+            printf("\nYour input is of the category: Negative Decimal Number\n\n");
+            validEntry = true;
+        }
+        //single character + newline
+        else if (strlen(input) == 2)
+        {
+            printf("\nYour input is of the category: Character\n\n");
+            validEntry = true;
+        }
+        //if not a number, not a char, must be a character string. otherwise it's blank input
+        else if (strlen(input) != 1)
+        {
+            printf("\nYour input is of the category: Character String\n\n");
+            validEntry = true;
+        }
+        else
+        {
+            printf("Input was blank, try again: ");
+            fgets(input, arrSize, stdin);
+        }
     }
 }
 
@@ -57,12 +74,12 @@ bool isInteger(char *input)
     for (int i = 0; i < strlen(input); i++)
     {
         //if char is not digit, leave loop as number is not int
-        //if nondigit and nonnewline, must be nonnumber
+        //if non-digit and non-newline, must be non-number
         if (atoi(&input[i]) <= 0 && input[i] != '\n' && input[i] != '0')
         {
             return false;
         }
-        //otherwise, if input is ONLY a newline, still a nonnumber
+        //otherwise, if input is ONLY a newline, still a non-number
         else if (input[i] == '\n' && strlen(input) == 1)
         {
             return false;
@@ -100,7 +117,7 @@ bool isDecimal(char *input)
                 *decPointer = '.';
             }
             //break on the first sighting of a decimal
-            //if there are multiple decimal points, it is not a decimal
+            //if there are multiple decimal points, it is not a decimal, therefore doesn't matter
             break;
         }
     }
@@ -136,8 +153,16 @@ bool isNegDec(char *input)
 //Begin code changes by Lucas Blanchard
 void ThreadTest()
 {
-    Thread *inputIdent = new Thread("input_identification_thread");
-    inputIdent->Fork(inputIdentification, 0);
+    if (projTask == 1)
+    {
+        Thread *inputIdent = new Thread("Project1_input_identification");
+        inputIdent->Fork(inputIdentification, 0);
+    }
+    else if (projTask == 2)
+    {
+        //taskThread->Fork(shoutingThreads, 0);
+    }
+    //exit main once forked, or once illegal projTask value is passed
     currentThread->Finish();
 }
 //End code changes by Lucas Blanchard
