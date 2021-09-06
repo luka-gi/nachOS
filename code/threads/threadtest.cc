@@ -25,7 +25,9 @@ void inputIdentification(int param)
 
     ////////////////////////////////
     //printf("\nyour input %s is int?: %d\n", strtok(input, "\n"), isInteger(input));
-    printf("\nyour input %s is dec?: %d\n", strtok(input, "\n"), isDecimal(input));
+    //printf("\nyour input %s is dec?: %d\n", strtok(input, "\n"), isDecimal(input));
+    //printf("\nyour input %s is negint?: %d\n", strtok(input, "\n"), isNegInt(input));
+    printf("\nyour input %s is negdec?: %d\n", strtok(input, "\n"), isNegDec(input));
     ////////////////////////////////
     //int
     //dec = int.int
@@ -41,8 +43,8 @@ bool isInteger(char *input)
     for (int i = 0; i < strlen(input); i++)
     {
         //if char is not digit, leave loop as number is not int
-        //if nondigit and nonnewline must be nonnumber
-        if (atoi(&input[i]) == 0 && input[i] != '\n' && input[i] != '0')
+        //if nondigit and nonnewline, must be nonnumber
+        if (atoi(&input[i]) <= 0 && input[i] != '\n' && input[i] != '0')
         {
             return false;
         }
@@ -87,6 +89,26 @@ bool isDecimal(char *input)
             //if there are multiple decimal points, it is not a decimal
             break;
         }
+    }
+    return false;
+}
+
+bool isNegInt(char *input)
+{
+    //starts with '-' and following characters are int == negative int
+    if (input[0] == '-' && isInteger(input + 1))
+    {
+        return true;
+    }
+    return false;
+}
+
+bool isNegDec(char *input)
+{
+    //starts with '-' and following characters are dec == negative dec
+    if (input[0] == '-' && isDecimal(input + 1))
+    {
+        return true;
     }
     return false;
 }

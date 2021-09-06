@@ -33,6 +33,8 @@ extern Timer *timer;				// the hardware alarm clock
 extern int projTask;
 extern bool isInteger(char *input);
 extern bool isDecimal(char *input);
+extern bool isNegInt(char *input);
+extern bool isNegDec(char *input);
 //End code changes by Lucas Blanchard
 
 #ifdef USER_PROGRAM
