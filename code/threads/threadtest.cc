@@ -30,7 +30,6 @@ void inputIdentification(int param)
         if (isInteger(input))
         {
             printf("\nYour input is of the category: Nonnegative Integer Number\n\n");
-            printf("input:%s\n", input);
             validEntry = true;
         }
         else if (isDecimal(input))
