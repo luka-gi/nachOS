@@ -23,18 +23,32 @@ void inputIdentification(int param)
     printf("enter something with a max size of %d: \n", arrSize);
     fgets(input, arrSize, stdin);
 
-    ////////////////////////////////
-    //printf("\nyour input %s is int?: %d\n", strtok(input, "\n"), isInteger(input));
-    //printf("\nyour input %s is dec?: %d\n", strtok(input, "\n"), isDecimal(input));
-    //printf("\nyour input %s is negint?: %d\n", strtok(input, "\n"), isNegInt(input));
-    printf("\nyour input %s is negdec?: %d\n", strtok(input, "\n"), isNegDec(input));
-    ////////////////////////////////
-    //int
-    //dec = int.int
-    //neg = "-"dec or "-"int
-    //char
-    //char str
-    ///////////////////////////////
+    if (isInteger(input))
+    {
+        printf("Your input is of the category: Integer");
+    }
+    else if (isDecimal(input))
+    {
+        printf("Your input is of the category: Decimal");
+    }
+    else if (isNegInt(input))
+    {
+        printf("Your input is of the category: Negative Integer");
+    }
+    else if (isNegDec(input))
+    {
+        printf("Your input is of the category: Negative Decimal");
+    }
+    //either newline or single character + newline
+    else if (strlen(input) <= 2)
+    {
+        printf("Your input is of the category: Character");
+    }
+    //if anything else, must be a character string
+    else
+    {
+        printf("Your input is of the category: Character String");
+    }
 }
 
 bool isInteger(char *input)
