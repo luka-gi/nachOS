@@ -75,9 +75,44 @@ void inputIdentification(int param)
     }
 }
 
-void shoutingThreads(int param)
+void shoutingThreads(int numShouts)
 {
-    return;
+    int numYields = 3 + Random() % 4;
+
+    for (int i = 0; i < numShouts; i++)
+    {
+        int chooseShout = Random() % 6;
+
+        if (chooseShout == 0)
+        {
+            printf("%s: For this task, you will implement a shouting match between threads.\n", currentThread->getName());
+        }
+        else if (chooseShout == 1)
+        {
+            printf("%s: Prompt the user for the number of threads, T, and the number of times each thread should shout, S, for a total of T * S shouts.\n", currentThread->getName());
+        }
+        else if (chooseShout == 2)
+        {
+            printf("%s: Each thread must be identified by a unique ID number when shouting.\n", currentThread->getName());
+        }
+        else if (chooseShout == 3)
+        {
+            printf("%s: After prompting the user for T and S, fork T threads to a shouting function.\n", currentThread->getName());
+        }
+        else if (chooseShout == 4)
+        {
+            printf("%s: Shouting consists of displaying a random phrase as output.\n", currentThread->getName());
+        }
+        else if (chooseShout == 5)
+        {
+            printf("%s: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.\n", currentThread->getName());
+        }
+
+        for (int j = 0; j < numYields; j++)
+        {
+            currentThread->Yield();
+        }
+    }
 }
 
 //determine if input char array resembles an integer
@@ -205,16 +240,19 @@ void ThreadTest()
 
         while (!validInput)
         {
+            //input size > max size is invalid
             if (inputOverflow(numThreadsInput))
             {
                 printf("input overflow error. enter number of threads to shout (from 0-999): ");
                 fgets(numThreadsInput, arrSize, stdin);
             }
+            //only integers are valid
             else if (!isInteger(numThreadsInput))
             {
                 printf("that was not an integer. enter number of threads to shout (from 0-999): ");
                 fgets(numThreadsInput, arrSize, stdin);
             }
+            //input is valid, accept input
             else
             {
                 validInput = true;
@@ -229,6 +267,7 @@ void ThreadTest()
         printf("enter number of shouts per thread (from 0-999): ");
         fgets(numShoutsInput, arrSize, stdin);
 
+        //same as previous loop
         while (!validInput)
         {
             if (inputOverflow(numShoutsInput))
@@ -248,14 +287,17 @@ void ThreadTest()
             }
         }
 
-        printf("\nboth inputs valid, forking threads\n\n");
+        DEBUG('t', "\nboth inputs valid, forking threads\n\n");
 
+        //creates user specified number of threads
         for (int i = 0; i < numThreads; i++)
         {
-            char buf[20];
-            snprintf(buf, sizeof buf, "Shouting Thread %d", i);
+            int threadNameMaxLen = strlen("Shouting Thread 999");
+            char *buf = new char[threadNameMaxLen];
+            snprintf(buf, threadNameMaxLen, "Shouting Thread %d", i);
+
             Thread *t = new Thread(buf);
-            t->Fork(shoutingThreads, i);
+            t->Fork(shoutingThreads, numShouts);
         }
     }
     //yield and end main thread once forked, or once illegal projTask value is passed
