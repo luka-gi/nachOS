@@ -24,10 +24,17 @@ void inputIdentification(int param)
     //fgets on a large array will be able to handle large inputs, and in the extreme case of overflow will truncate
     fgets(input, arrSize, stdin);
 
+    //only break if input is valid (or only loops if blank input)
     bool validEntry = false;
     while (!validEntry)
     {
-        if (isInteger(input))
+        if (inputOverflow(input))
+        {
+            printf("input overflow, try again: ");
+            fgets(input, arrSize, stdin);
+        }
+        //find the category that the input belongs to
+        else if (isInteger(input))
         {
             printf("\nYour input is of the category: Nonnegative Integer Number\n\n");
             validEntry = true;
@@ -47,8 +54,8 @@ void inputIdentification(int param)
             printf("\nYour input is of the category: Negative Decimal Number\n\n");
             validEntry = true;
         }
-        //single character + newline
-        else if (strlen(input) == 2)
+        //single character that somehow isn't newline OR single character and newline
+        else if ((strlen(input) == 1 && input[0] != '\n') || (strlen(input) == 2 && input[1] == '\n'))
         {
             printf("\nYour input is of the category: Character\n\n");
             validEntry = true;
@@ -59,6 +66,7 @@ void inputIdentification(int param)
             printf("\nYour input is of the category: Character String\n\n");
             validEntry = true;
         }
+        //blank input, so take a new input
         else
         {
             printf("Input was blank, try again: ");
@@ -67,6 +75,12 @@ void inputIdentification(int param)
     }
 }
 
+void shoutingThreads(int param)
+{
+    return;
+}
+
+//determine if input char array resembles an integer
 bool isInteger(char *input)
 {
     //loop through array to determine if is int or not
@@ -88,6 +102,7 @@ bool isInteger(char *input)
     return true;
 }
 
+//determine if input char array resembles a decimal
 bool isDecimal(char *input)
 {
     //initiate the decimal pointer as null
@@ -123,6 +138,7 @@ bool isDecimal(char *input)
     return false;
 }
 
+//determine if char array resembles negative integer
 bool isNegInt(char *input)
 {
     //starts with '-' and following characters are int == negative int
@@ -133,6 +149,7 @@ bool isNegInt(char *input)
     return false;
 }
 
+//determine if char array resembles negative decimal
 bool isNegDec(char *input)
 {
     //starts with '-' and following characters are dec == negative dec
@@ -142,14 +159,26 @@ bool isNegDec(char *input)
     }
     return false;
 }
-//End code changes by Lucas Blanchard
 
-//----------------------------------------------------------------------
-// ThreadTest
-// 	Invoke a test routine.
-//----------------------------------------------------------------------
+//pass in string taken from fgets.
+//fgets only reads from stdin if the char array is not overfilled.
+//in the case of overflow, stdin still has characters that need to be read
+//this function flushes stdin and returns that it has detected overflow
+bool inputOverflow(char *input)
+{
+    if (input[strlen(input)] == '\0' && input[strlen(input) - 1] != '\n')
+    {
+        int charFromInput;
+        while ((charFromInput = getchar() != '\n' && charFromInput != EOF))
+        {
+            //this while loop, the getchar functin removes stdin chars from the buffer
+        }
+        return true;
+    }
+    return false;
+}
 
-//Begin code changes by Lucas Blanchard
+//ThreadTest() run by nachos
 void ThreadTest()
 {
     if (projTask == 1)
@@ -159,9 +188,77 @@ void ThreadTest()
     }
     else if (projTask == 2)
     {
-        //taskThread->Fork(shoutingThreads, 0);
+        //5 bytes can hold 0-999 from user input, should be fine for both vals
+        //(1 byte will be passed a newline)
+        int arrSize = 5;
+        char *numThreadsInput = new char[arrSize];
+        char *numShoutsInput = new char[arrSize];
+        int numThreads;
+        int numShouts;
+
+        //prompt and capture valid input
+        bool validInput = false;
+
+        //numThreads input validation
+        printf("enter number of threads to shout (from 0-999): ");
+        fgets(numThreadsInput, arrSize, stdin);
+
+        while (!validInput)
+        {
+            if (inputOverflow(numThreadsInput))
+            {
+                printf("input overflow error. enter number of threads to shout (from 0-999): ");
+                fgets(numThreadsInput, arrSize, stdin);
+            }
+            else if (!isInteger(numThreadsInput))
+            {
+                printf("that was not an integer. enter number of threads to shout (from 0-999): ");
+                fgets(numThreadsInput, arrSize, stdin);
+            }
+            else
+            {
+                validInput = true;
+                numThreads = atoi(numThreadsInput);
+            }
+        }
+
+        //reset this to reuse it
+        validInput = false;
+
+        //numShouts input validation
+        printf("enter number of shouts per thread (from 0-999): ");
+        fgets(numShoutsInput, arrSize, stdin);
+
+        while (!validInput)
+        {
+            if (inputOverflow(numShoutsInput))
+            {
+                printf("input overflow error. enter number of threads to shout (from 0-999): ");
+                fgets(numShoutsInput, arrSize, stdin);
+            }
+            else if (!isInteger(numShoutsInput))
+            {
+                printf("that was not valid input. enter number of shouts per thread (from 0-999): ");
+                fgets(numShoutsInput, arrSize, stdin);
+            }
+            else
+            {
+                validInput = true;
+                numShouts = atoi(numShoutsInput);
+            }
+        }
+
+        printf("\nboth inputs valid, forking threads\n\n");
+
+        for (int i = 0; i < numThreads; i++)
+        {
+            char buf[20];
+            snprintf(buf, sizeof buf, "Shouting Thread %d", i);
+            Thread *t = new Thread(buf);
+            t->Fork(shoutingThreads, i);
+        }
     }
-    //exit main once forked, or once illegal projTask value is passed
+    //yield and end main thread once forked, or once illegal projTask value is passed
     currentThread->Finish();
 }
 //End code changes by Lucas Blanchard
