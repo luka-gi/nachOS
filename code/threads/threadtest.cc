@@ -77,10 +77,9 @@ void inputIdentification(int param)
 
 void shoutingThreads(int numShouts)
 {
-    int numYields = 3 + Random() % 4;
-
     for (int i = 0; i < numShouts; i++)
     {
+        int numYields = 3 + Random() % 4;
         int chooseShout = Random() % 6;
 
         if (chooseShout == 0)
