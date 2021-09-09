@@ -106,7 +106,6 @@ void shoutingThreads(int numShouts)
         {
             printf("%s: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.\n", currentThread->getName());
         }
-
         for (int j = 0; j < numYields; j++)
         {
             currentThread->Yield();

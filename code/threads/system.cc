@@ -119,7 +119,7 @@ void Initialize(int argc, char **argv)
         {
             //segfault occurs if no arguments are passed and accessed anyway
             //also check if any of the possible entires were valid
-            if (argc != 1 && (atof(*(argv + 1)) == 1.0 || atof(*(argv + 1)) == 2.0))
+            if (argc > 1 && (!strcmp(*(argv + 1), "1") || !strcmp(*(argv + 1), "2")))
             {
                 projTask = atoi(*(argv + 1));
             }
