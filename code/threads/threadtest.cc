@@ -13,14 +13,14 @@
 #include "system.h"
 
 //Begin code changes by Lucas Blanchard
-void inputIdentification(int param)
+void inputIdentification(int which)
 {
     //initialize arbitrary sized array for input storage
     int arrSize = 1024;
     char *input = new char[arrSize];
 
     //prompt and capture input
-    printf("enter something with a max byte size of %d: ", arrSize);
+    printf("enter something with a max byte size of %d, whitespace don't count: ", arrSize);
     //fgets on a large array will be able to handle large inputs, and in the extreme case of overflow will truncate
     fgets(input, arrSize, stdin);
 
@@ -69,14 +69,16 @@ void inputIdentification(int param)
         //blank input, so take a new input
         else
         {
-            printf("Input was blank, try again: ");
+            printf("Input was invalid, try again: ");
             fgets(input, arrSize, stdin);
         }
     }
 }
 
-void shoutingThreads(int numShouts)
+void shoutingThreads(int which)
 {
+    //numShouts is a global variable that will NOT be changed after validation
+    //should not cause race condition
     for (int i = 0; i < numShouts; i++)
     {
         int numYields = 3 + Random() % 4;
@@ -106,6 +108,7 @@ void shoutingThreads(int numShouts)
         {
             printf("%s: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.\n", currentThread->getName());
         }
+
         for (int j = 0; j < numYields; j++)
         {
             currentThread->Yield();
@@ -119,14 +122,19 @@ bool isInteger(char *input)
     //loop through array to determine if is int or not
     for (int i = 0; i < strlen(input); i++)
     {
-        //if char is not digit, leave loop as number is not int
-        //if non-digit and non-newline, must be non-number
-        if (atoi(&input[i]) <= 0 && input[i] != '\n' && input[i] != '0')
+
+        //if input is ONLY a newline or null, then is empty and non-number
+        if (input[i] == '\n' && strlen(input) <= 1)
         {
             return false;
         }
-        //otherwise, if input is ONLY a newline, still a non-number
-        else if (input[i] == '\n' && strlen(input) == 1)
+        //if char is not positive digit or any newline (targtting the one with fgets), leave loop as number is not int
+        else if ((atoi(&input[i]) <= 0 && input[i] != '0') && (input[i] != '\n'))
+        {
+            return false;
+        }
+        //otherwise if detected final newline from fgets other type of whitespace, do not consider int
+        else if ((input[i] == '\n' && i != strlen(input) - 1) || input[i] == ' ' || input[i] == '\t' || input[i] == '\v' || input[i] == '\f' || input[i] == '\r')
         {
             return false;
         }
@@ -295,7 +303,7 @@ void ThreadTest()
             snprintf(buf, threadNameMaxLen, "Shouting Thread %d", i);
 
             Thread *t = new Thread(buf);
-            t->Fork(shoutingThreads, numShouts);
+            t->Fork(shoutingThreads, i);
         }
     }
     //yield and end main thread once forked, or once illegal projTask value is passed

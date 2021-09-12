@@ -21,6 +21,8 @@ Timer *timer;                // the hardware timer device,
 
 //Begin code changes by Lucas Blanchard
 int projTask = -1;
+
+int numShouts;
 //End code changes by Lucas Blanchard
 
 #ifdef FILESYS_NEEDED
@@ -118,7 +120,7 @@ void Initialize(int argc, char **argv)
         else if (!strcmp(*argv, "-A"))
         {
             //segfault occurs if no arguments are passed and accessed anyway
-            //also check if any of the possible entires were valid
+            //also check if any of the possible entries were valid
             if (argc > 1 && (!strcmp(*(argv + 1), "1") || !strcmp(*(argv + 1), "2")))
             {
                 projTask = atoi(*(argv + 1));
