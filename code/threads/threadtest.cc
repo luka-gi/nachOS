@@ -20,7 +20,7 @@ void inputIdentification(int which)
     char *input = new char[arrSize];
 
     //prompt and capture input
-    printf("enter something with a max byte size of %d, whitespace don't count: ", arrSize);
+    printf("enter something with a max byte size of %d, whitespaces don't count: ", arrSize);
     //fgets on a large array will be able to handle large inputs, and in the extreme case of overflow will truncate
     fgets(input, arrSize, stdin);
 
@@ -235,13 +235,12 @@ void ThreadTest()
         char *numThreadsInput = new char[arrSize];
         char *numShoutsInput = new char[arrSize];
         int numThreads;
-        int numShouts;
 
         //prompt and capture valid input
         bool validInput = false;
 
         //numThreads input validation
-        printf("enter number of threads to shout (from 0-999): ");
+        printf("enter number of threads to shout (from 0-999), whitespaces don't count: ");
         fgets(numThreadsInput, arrSize, stdin);
 
         while (!validInput)
@@ -270,7 +269,7 @@ void ThreadTest()
         validInput = false;
 
         //numShouts input validation
-        printf("enter number of shouts per thread (from 0-999): ");
+        printf("enter number of shouts per thread (from 0-999), whitespaces don't count: ");
         fgets(numShoutsInput, arrSize, stdin);
 
         //same as previous loop
