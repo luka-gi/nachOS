@@ -30,7 +30,14 @@ extern Statistics *stats;			// performance metrics
 extern Timer *timer;				// the hardware alarm clock
 
 //Begin code changes by Lucas Blanchard
-extern int partNum;
+extern int projTask;
+extern int numShouts;
+
+extern bool isInteger(char *input);
+extern bool isDecimal(char *input);
+extern bool isNegInt(char *input);
+extern bool isNegDec(char *input);
+extern bool inputOverflow(char *input);
 //End code changes by Lucas Blanchard
 
 #ifdef USER_PROGRAM

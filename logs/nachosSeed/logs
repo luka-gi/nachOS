@@ -1,32 +1,239 @@
-Running nachos 2 times.\n\n
-nachos -rs 10035 -A 10
-*** thread 5 looped 10 times
-*** thread 5 looped 10 times
-*** thread 5 looped 10 times
-*** thread 5 looped 10 times
-*** thread 5 looped 10 times
+Running nachos 10 times.\n\n
+nachos -rs 26651 -A 2
+enter number of threads to shout (from 0-999): that was not an integer. enter number of threads to shout (from 0-999): 
+Cleaning up...
+nachos -rs 1044 -A 2
+enter number of threads to shout (from 0-999): 
+Cleaning up...
+nachos -rs 30441 -A 2
+enter number of threads to shout (from 0-999): 
+Cleaning up...
+nachos -rs 24978 -A 2
+enter number of threads to shout (from 0-999): 
+Cleaning up...
+nachos -rs 27623 -A 2
+enter number of threads to shout (from 0-999): 
+Cleaning up...
+nachos -rs 7710 -A 2
+enter number of threads to shout (from 0-999): 
+Cleaning up...
+nachos -rs 32325 -A 2
+enter number of threads to shout (from 0-999): 
+Cleaning up...
+nachos -rs 5931 -A 2
+enter number of threads to shout (from 0-999): 
+Cleaning up...
+nachos -rs 16678 -A 2
+enter number of threads to shout (from 0-999): 
+Cleaning up...
+nachos -rs 25658 -A 2
+enter number of threads to shout (from 0-999): 
+Cleaning up...
+Running nachos 10 times.\n\n
+nachos -rs 31458 -A 2
+enter number of threads to shout (from 0-999): enter number of shouts per thread (from 0-999): Shouting Thread 0: After prompting the user for T and S, fork T threads to a shouting function.
+Shouting Thread 1: After prompting the user for T and S, fork T threads to a shouting function.
+Shouting Thread 2: After prompting the user for T and S, fork T threads to a shouting function.
+Shouting Thread 2: For this task, you will implement a shouting match between threads.
+Shouting Thread 0: After prompting the user for T and S, fork T threads to a shouting function.
+Shouting Thread 1: Each thread must be identified by a unique ID number when shouting.
+Shouting Thread 2: Shouting consists of displaying a random phrase as output.
+Shouting Thread 0: After prompting the user for T and S, fork T threads to a shouting function.
+Shouting Thread 1: For this task, you will implement a shouting match between threads.
 No threads ready or runnable, and no pending interrupts.
 Assuming the program completed.
 Machine halting!
 
-Ticks: total 193, idle 113, system 80, user 0
+Ticks: total 690, idle 140, system 550, user 0
 Disk I/O: reads 0, writes 0
 Console I/O: reads 0, writes 0
 Paging: faults 0
 Network I/O: packets received 0, sent 0
 
 Cleaning up...
-nachos -rs 3587 -A 10
-*** thread 5 looped 10 times
-*** thread 5 looped 10 times
-*** thread 5 looped 10 times
-*** thread 5 looped 10 times
-*** thread 5 looped 10 times
+nachos -rs 14590 -A 2
+enter number of threads to shout (from 0-999): enter number of shouts per thread (from 0-999): Shouting Thread 0: After prompting the user for T and S, fork T threads to a shouting function.
+Shouting Thread 1: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.
+Shouting Thread 2: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.
+Shouting Thread 1: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.
+Shouting Thread 2: Prompt the user for the number of threads, T, and the number of times each thread should shout, S, for a total of T * S shouts.
+Shouting Thread 0: For this task, you will implement a shouting match between threads.
+Shouting Thread 1: After prompting the user for T and S, fork T threads to a shouting function.
+Shouting Thread 2: After prompting the user for T and S, fork T threads to a shouting function.
+Shouting Thread 0: Shouting consists of displaying a random phrase as output.
 No threads ready or runnable, and no pending interrupts.
 Assuming the program completed.
 Machine halting!
 
-Ticks: total 214, idle 114, system 100, user 0
+Ticks: total 506, idle 6, system 500, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+nachos -rs 24988 -A 2
+enter number of threads to shout (from 0-999): enter number of shouts per thread (from 0-999): Shouting Thread 0: For this task, you will implement a shouting match between threads.
+Shouting Thread 1: Each thread must be identified by a unique ID number when shouting.
+Shouting Thread 2: After prompting the user for T and S, fork T threads to a shouting function.
+Shouting Thread 2: For this task, you will implement a shouting match between threads.
+Shouting Thread 0: After prompting the user for T and S, fork T threads to a shouting function.
+Shouting Thread 1: Each thread must be identified by a unique ID number when shouting.
+Shouting Thread 2: Shouting consists of displaying a random phrase as output.
+Shouting Thread 1: Shouting consists of displaying a random phrase as output.
+Shouting Thread 0: After prompting the user for T and S, fork T threads to a shouting function.
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 564, idle 54, system 510, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+nachos -rs 22614 -A 2
+enter number of threads to shout (from 0-999): enter number of shouts per thread (from 0-999): Shouting Thread 0: Shouting consists of displaying a random phrase as output.
+Shouting Thread 1: Shouting consists of displaying a random phrase as output.
+Shouting Thread 2: For this task, you will implement a shouting match between threads.
+Shouting Thread 2: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.
+Shouting Thread 0: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.
+Shouting Thread 1: Each thread must be identified by a unique ID number when shouting.
+Shouting Thread 0: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.
+Shouting Thread 1: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.
+Shouting Thread 2: Each thread must be identified by a unique ID number when shouting.
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 552, idle 102, system 450, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+nachos -rs 6269 -A 2
+enter number of threads to shout (from 0-999): enter number of shouts per thread (from 0-999): Shouting Thread 0: Each thread must be identified by a unique ID number when shouting.
+Shouting Thread 2: Prompt the user for the number of threads, T, and the number of times each thread should shout, S, for a total of T * S shouts.
+Shouting Thread 1: Shouting consists of displaying a random phrase as output.
+Shouting Thread 0: Prompt the user for the number of threads, T, and the number of times each thread should shout, S, for a total of T * S shouts.
+Shouting Thread 1: Shouting consists of displaying a random phrase as output.
+Shouting Thread 0: Prompt the user for the number of threads, T, and the number of times each thread should shout, S, for a total of T * S shouts.
+Shouting Thread 2: Shouting consists of displaying a random phrase as output.
+Shouting Thread 1: Each thread must be identified by a unique ID number when shouting.
+Shouting Thread 2: Shouting consists of displaying a random phrase as output.
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 682, idle 72, system 610, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+nachos -rs 26500 -A 2
+enter number of threads to shout (from 0-999): enter number of shouts per thread (from 0-999): Shouting Thread 0: Prompt the user for the number of threads, T, and the number of times each thread should shout, S, for a total of T * S shouts.
+Shouting Thread 1: Prompt the user for the number of threads, T, and the number of times each thread should shout, S, for a total of T * S shouts.
+Shouting Thread 2: For this task, you will implement a shouting match between threads.
+Shouting Thread 1: After prompting the user for T and S, fork T threads to a shouting function.
+Shouting Thread 0: Prompt the user for the number of threads, T, and the number of times each thread should shout, S, for a total of T * S shouts.
+Shouting Thread 2: Prompt the user for the number of threads, T, and the number of times each thread should shout, S, for a total of T * S shouts.
+Shouting Thread 0: For this task, you will implement a shouting match between threads.
+Shouting Thread 1: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.
+Shouting Thread 2: For this task, you will implement a shouting match between threads.
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 624, idle 34, system 590, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+nachos -rs 8535 -A 2
+enter number of threads to shout (from 0-999): enter number of shouts per thread (from 0-999): Shouting Thread 0: After prompting the user for T and S, fork T threads to a shouting function.
+Shouting Thread 1: Each thread must be identified by a unique ID number when shouting.
+Shouting Thread 2: After prompting the user for T and S, fork T threads to a shouting function.
+Shouting Thread 1: For this task, you will implement a shouting match between threads.
+Shouting Thread 2: Prompt the user for the number of threads, T, and the number of times each thread should shout, S, for a total of T * S shouts.
+Shouting Thread 0: After prompting the user for T and S, fork T threads to a shouting function.
+Shouting Thread 1: Prompt the user for the number of threads, T, and the number of times each thread should shout, S, for a total of T * S shouts.
+Shouting Thread 0: Shouting consists of displaying a random phrase as output.
+Shouting Thread 2: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 543, idle 33, system 510, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+nachos -rs 29687 -A 2
+enter number of threads to shout (from 0-999): enter number of shouts per thread (from 0-999): Shouting Thread 0: Each thread must be identified by a unique ID number when shouting.
+Shouting Thread 1: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.
+Shouting Thread 2: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.
+Shouting Thread 2: Prompt the user for the number of threads, T, and the number of times each thread should shout, S, for a total of T * S shouts.
+Shouting Thread 0: Each thread must be identified by a unique ID number when shouting.
+Shouting Thread 1: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.
+Shouting Thread 2: Shouting consists of displaying a random phrase as output.
+Shouting Thread 0: For this task, you will implement a shouting match between threads.
+Shouting Thread 1: Shouting consists of displaying a random phrase as output.
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 605, idle 65, system 540, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+nachos -rs 28531 -A 2
+enter number of threads to shout (from 0-999): enter number of shouts per thread (from 0-999): Shouting Thread 0: For this task, you will implement a shouting match between threads.
+Shouting Thread 1: After prompting the user for T and S, fork T threads to a shouting function.
+Shouting Thread 2: After prompting the user for T and S, fork T threads to a shouting function.
+Shouting Thread 0: For this task, you will implement a shouting match between threads.
+Shouting Thread 1: Shouting consists of displaying a random phrase as output.
+Shouting Thread 2: After prompting the user for T and S, fork T threads to a shouting function.
+Shouting Thread 0: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.
+Shouting Thread 2: Each thread must be identified by a unique ID number when shouting.
+Shouting Thread 1: Prompt the user for the number of threads, T, and the number of times each thread should shout, S, for a total of T * S shouts.
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 509, idle 19, system 490, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+nachos -rs 2480 -A 2
+enter number of threads to shout (from 0-999): enter number of shouts per thread (from 0-999): Shouting Thread 0: For this task, you will implement a shouting match between threads.
+Shouting Thread 1: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.
+Shouting Thread 2: Shouting consists of displaying a random phrase as output.
+Shouting Thread 1: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.
+Shouting Thread 0: Prompt the user for the number of threads, T, and the number of times each thread should shout, S, for a total of T * S shouts.
+Shouting Thread 2: Shouting consists of displaying a random phrase as output.
+Shouting Thread 1: Whenever a thread shouts, it enters a busy waiting loop where it yields the CPU for 3-6 cycles randomly.
+Shouting Thread 2: Each thread must be identified by a unique ID number when shouting.
+Shouting Thread 0: Shouting consists of displaying a random phrase as output.
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 580, idle 50, system 530, user 0
 Disk I/O: reads 0, writes 0
 Console I/O: reads 0, writes 0
 Paging: faults 0
