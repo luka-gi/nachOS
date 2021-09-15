@@ -124,6 +124,7 @@ void Initialize(int argc, char **argv)
             if (argc > 1 && (!strcmp(*(argv + 1), "1") || !strcmp(*(argv + 1), "2")))
             {
                 projTask = atoi(*(argv + 1));
+                argCount = 2;
             }
             //otherwise, an argument was entered but not a valid option
             //calling currentThread->Finish() may cause a segfault. projTask is set to -1 and nachos will die on its own.
