@@ -1,18 +1,54 @@
 Running nachos 10 times.\n\n
-nachos -rs 2196 
+nachos -rs 10500 
 Thread 0 looped 0 times, count is 1
 Thread 1 looped 0 times, count is 2
 Thread 0 looped 1 times, count is 3
-Thread 0 looped 2 times, count is 4
-Thread 1 looped 1 times, count is 5
+Thread 1 looped 1 times, count is 4
+Thread 0 looped 2 times, count is 5
 Thread 1 looped 2 times, count is 6
 Thread 0 looped 3 times, count is 7
 Thread 1 looped 3 times, count is 8
 Thread 0 looped 4 times, count is 9
-Thread 0 looped 5 times, count is 10
-Thread 1 looped 4 times, count is 11
-Thread 0 looped 6 times, count is 12
-Thread 1 looped 5 times, count is 13
+Thread 1 looped 4 times, count is 10
+Thread 0 looped 5 times, count is 11
+Thread 1 looped 5 times, count is 12
+Thread 0 looped 6 times, count is 13
+Thread 1 looped 6 times, count is 14
+Thread 0 looped 7 times, count is 15
+Thread 1 looped 7 times, count is 16
+Thread 0 looped 8 times, count is 17
+Thread 0 looped 9 times, count is 18
+Thread 1 looped 8 times, count is 19
+Thread 0 looped 10 times, count is 20
+Thread 1 looped 9 times, count is 21
+Thread 0 looped 11 times, count is 22
+Thread 1 looped 10 times, count is 23
+Thread 1 looped 11 times, count is 24
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 874, idle 14, system 860, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+nachos -rs 26340 
+Thread 0 looped 0 times, count is 1
+Thread 1 looped 0 times, count is 2
+Thread 0 looped 1 times, count is 3
+Thread 1 looped 1 times, count is 4
+Thread 0 looped 2 times, count is 5
+Thread 1 looped 2 times, count is 6
+Thread 0 looped 3 times, count is 7
+Thread 1 looped 3 times, count is 8
+Thread 0 looped 4 times, count is 9
+Thread 1 looped 4 times, count is 10
+Thread 0 looped 5 times, count is 11
+Thread 1 looped 5 times, count is 12
+Thread 0 looped 6 times, count is 13
 Thread 0 looped 7 times, count is 14
 Thread 1 looped 6 times, count is 15
 Thread 0 looped 8 times, count is 16
@@ -28,100 +64,28 @@ No threads ready or runnable, and no pending interrupts.
 Assuming the program completed.
 Machine halting!
 
-Ticks: total 1020, idle 130, system 890, user 0
+Ticks: total 920, idle 40, system 880, user 0
 Disk I/O: reads 0, writes 0
 Console I/O: reads 0, writes 0
 Paging: faults 0
 Network I/O: packets received 0, sent 0
 
 Cleaning up...
-nachos -rs 17739 
-Thread 0 looped 0 times, count is 1
-Thread 1 looped 0 times, count is 2
-Thread 0 looped 1 times, count is 3
-Thread 0 looped 2 times, count is 4
-Thread 1 looped 1 times, count is 5
-Thread 0 looped 3 times, count is 6
-Thread 0 looped 4 times, count is 7
-Thread 0 looped 5 times, count is 8
-Thread 1 looped 2 times, count is 9
-Thread 0 looped 6 times, count is 10
-Thread 1 looped 3 times, count is 11
-Thread 1 looped 4 times, count is 12
-Thread 0 looped 7 times, count is 13
-Thread 1 looped 5 times, count is 14
-Thread 0 looped 8 times, count is 15
-Thread 1 looped 6 times, count is 16
-Thread 0 looped 9 times, count is 17
-Thread 1 looped 7 times, count is 18
-Thread 0 looped 10 times, count is 19
-Thread 1 looped 8 times, count is 20
-Thread 0 looped 11 times, count is 21
-Thread 1 looped 9 times, count is 22
-Thread 1 looped 10 times, count is 23
-Thread 1 looped 11 times, count is 24
-No threads ready or runnable, and no pending interrupts.
-Assuming the program completed.
-Machine halting!
-
-Ticks: total 1052, idle 132, system 920, user 0
-Disk I/O: reads 0, writes 0
-Console I/O: reads 0, writes 0
-Paging: faults 0
-Network I/O: packets received 0, sent 0
-
-Cleaning up...
-nachos -rs 32601 
+nachos -rs 910 
 Thread 0 looped 0 times, count is 1
 Thread 1 looped 0 times, count is 2
 Thread 0 looped 1 times, count is 3
 Thread 1 looped 1 times, count is 4
 Thread 0 looped 2 times, count is 5
-Thread 0 looped 3 times, count is 6
-Thread 1 looped 2 times, count is 7
-Thread 0 looped 4 times, count is 8
-Thread 0 looped 5 times, count is 9
-Thread 1 looped 3 times, count is 10
-Thread 0 looped 6 times, count is 11
-Thread 1 looped 4 times, count is 12
-Thread 0 looped 7 times, count is 13
-Thread 1 looped 5 times, count is 14
-Thread 0 looped 8 times, count is 15
-Thread 1 looped 6 times, count is 16
-Thread 0 looped 9 times, count is 17
-Thread 1 looped 7 times, count is 18
-Thread 0 looped 10 times, count is 19
-Thread 1 looped 8 times, count is 20
-Thread 0 looped 11 times, count is 21
-Thread 1 looped 9 times, count is 22
-Thread 1 looped 10 times, count is 23
-Thread 1 looped 11 times, count is 24
-No threads ready or runnable, and no pending interrupts.
-Assuming the program completed.
-Machine halting!
-
-Ticks: total 880, idle 30, system 850, user 0
-Disk I/O: reads 0, writes 0
-Console I/O: reads 0, writes 0
-Paging: faults 0
-Network I/O: packets received 0, sent 0
-
-Cleaning up...
-nachos -rs 14854 
-Thread 0 looped 0 times, count is 1
-Thread 1 looped 0 times, count is 2
-Thread 0 looped 1 times, count is 3
-Thread 0 looped 2 times, count is 4
-Thread 1 looped 1 times, count is 5
-Thread 0 looped 3 times, count is 6
-Thread 1 looped 2 times, count is 7
+Thread 1 looped 2 times, count is 6
+Thread 0 looped 3 times, count is 7
 Thread 1 looped 3 times, count is 8
 Thread 0 looped 4 times, count is 9
 Thread 1 looped 4 times, count is 10
 Thread 0 looped 5 times, count is 11
 Thread 1 looped 5 times, count is 12
-Thread 0 looped 6 times, count is 13
-Thread 1 looped 6 times, count is 14
+Thread 1 looped 6 times, count is 13
+Thread 0 looped 6 times, count is 14
 Thread 1 looped 7 times, count is 15
 Thread 0 looped 7 times, count is 16
 Thread 1 looped 8 times, count is 17
@@ -136,20 +100,92 @@ No threads ready or runnable, and no pending interrupts.
 Assuming the program completed.
 Machine halting!
 
-Ticks: total 889, idle 9, system 880, user 0
+Ticks: total 918, idle 18, system 900, user 0
 Disk I/O: reads 0, writes 0
 Console I/O: reads 0, writes 0
 Paging: faults 0
 Network I/O: packets received 0, sent 0
 
 Cleaning up...
-nachos -rs 4279 
+nachos -rs 28555 
 Thread 0 looped 0 times, count is 1
 Thread 1 looped 0 times, count is 2
 Thread 0 looped 1 times, count is 3
 Thread 1 looped 1 times, count is 4
-Thread 1 looped 2 times, count is 5
-Thread 0 looped 2 times, count is 6
+Thread 0 looped 2 times, count is 5
+Thread 0 looped 3 times, count is 6
+Thread 1 looped 2 times, count is 7
+Thread 0 looped 4 times, count is 8
+Thread 1 looped 3 times, count is 9
+Thread 0 looped 5 times, count is 10
+Thread 0 looped 6 times, count is 11
+Thread 0 looped 7 times, count is 12
+Thread 1 looped 4 times, count is 13
+Thread 0 looped 8 times, count is 14
+Thread 0 looped 9 times, count is 15
+Thread 1 looped 5 times, count is 16
+Thread 0 looped 10 times, count is 17
+Thread 1 looped 6 times, count is 18
+Thread 0 looped 11 times, count is 19
+Thread 1 looped 7 times, count is 20
+Thread 1 looped 8 times, count is 21
+Thread 1 looped 9 times, count is 22
+Thread 1 looped 10 times, count is 23
+Thread 1 looped 11 times, count is 24
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 983, idle 83, system 900, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+nachos -rs 8352 
+Thread 0 looped 0 times, count is 1
+Thread 1 looped 0 times, count is 2
+Thread 0 looped 1 times, count is 3
+Thread 1 looped 1 times, count is 4
+Thread 0 looped 2 times, count is 5
+Thread 1 looped 2 times, count is 6
+Thread 1 looped 3 times, count is 7
+Thread 0 looped 3 times, count is 8
+Thread 1 looped 4 times, count is 9
+Thread 0 looped 4 times, count is 10
+Thread 1 looped 5 times, count is 11
+Thread 1 looped 6 times, count is 12
+Thread 0 looped 5 times, count is 13
+Thread 1 looped 7 times, count is 14
+Thread 0 looped 6 times, count is 15
+Thread 1 looped 8 times, count is 16
+Thread 1 looped 9 times, count is 17
+Thread 0 looped 7 times, count is 18
+Thread 1 looped 10 times, count is 19
+Thread 0 looped 8 times, count is 20
+Thread 0 looped 9 times, count is 21
+Thread 1 looped 11 times, count is 22
+Thread 0 looped 10 times, count is 23
+Thread 0 looped 11 times, count is 24
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 866, idle 6, system 860, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...
+nachos -rs 4558 
+Thread 0 looped 0 times, count is 1
+Thread 1 looped 0 times, count is 2
+Thread 0 looped 1 times, count is 3
+Thread 1 looped 1 times, count is 4
+Thread 0 looped 2 times, count is 5
+Thread 1 looped 2 times, count is 6
 Thread 0 looped 3 times, count is 7
 Thread 1 looped 3 times, count is 8
 Thread 0 looped 4 times, count is 9
@@ -157,13 +193,13 @@ Thread 1 looped 4 times, count is 10
 Thread 0 looped 5 times, count is 11
 Thread 1 looped 5 times, count is 12
 Thread 0 looped 6 times, count is 13
-Thread 1 looped 6 times, count is 14
-Thread 0 looped 7 times, count is 15
+Thread 0 looped 7 times, count is 14
+Thread 1 looped 6 times, count is 15
 Thread 0 looped 8 times, count is 16
-Thread 1 looped 7 times, count is 17
-Thread 0 looped 9 times, count is 18
-Thread 1 looped 8 times, count is 19
-Thread 0 looped 10 times, count is 20
+Thread 0 looped 9 times, count is 17
+Thread 1 looped 7 times, count is 18
+Thread 0 looped 10 times, count is 19
+Thread 1 looped 8 times, count is 20
 Thread 1 looped 9 times, count is 21
 Thread 0 looped 11 times, count is 22
 Thread 1 looped 10 times, count is 23
@@ -172,69 +208,33 @@ No threads ready or runnable, and no pending interrupts.
 Assuming the program completed.
 Machine halting!
 
-Ticks: total 958, idle 58, system 900, user 0
+Ticks: total 943, idle 3, system 940, user 0
 Disk I/O: reads 0, writes 0
 Console I/O: reads 0, writes 0
 Paging: faults 0
 Network I/O: packets received 0, sent 0
 
 Cleaning up...
-nachos -rs 29130 
+nachos -rs 7591 
 Thread 0 looped 0 times, count is 1
 Thread 1 looped 0 times, count is 2
 Thread 0 looped 1 times, count is 3
-Thread 1 looped 1 times, count is 4
-Thread 0 looped 2 times, count is 5
-Thread 1 looped 2 times, count is 6
-Thread 0 looped 3 times, count is 7
-Thread 1 looped 3 times, count is 8
-Thread 0 looped 4 times, count is 9
+Thread 0 looped 2 times, count is 4
+Thread 1 looped 1 times, count is 5
+Thread 0 looped 3 times, count is 6
+Thread 1 looped 2 times, count is 7
+Thread 0 looped 4 times, count is 8
+Thread 1 looped 3 times, count is 9
 Thread 1 looped 4 times, count is 10
 Thread 0 looped 5 times, count is 11
-Thread 0 looped 6 times, count is 12
-Thread 1 looped 5 times, count is 13
-Thread 0 looped 7 times, count is 14
-Thread 1 looped 6 times, count is 15
-Thread 0 looped 8 times, count is 16
-Thread 1 looped 7 times, count is 17
-Thread 0 looped 9 times, count is 18
-Thread 0 looped 10 times, count is 19
-Thread 1 looped 8 times, count is 20
-Thread 0 looped 11 times, count is 21
-Thread 1 looped 9 times, count is 22
-Thread 1 looped 10 times, count is 23
-Thread 1 looped 11 times, count is 24
-No threads ready or runnable, and no pending interrupts.
-Assuming the program completed.
-Machine halting!
-
-Ticks: total 941, idle 41, system 900, user 0
-Disk I/O: reads 0, writes 0
-Console I/O: reads 0, writes 0
-Paging: faults 0
-Network I/O: packets received 0, sent 0
-
-Cleaning up...
-nachos -rs 2823 
-Thread 0 looped 0 times, count is 1
-Thread 1 looped 0 times, count is 2
-Thread 0 looped 1 times, count is 3
-Thread 1 looped 1 times, count is 4
-Thread 0 looped 2 times, count is 5
-Thread 1 looped 2 times, count is 6
-Thread 0 looped 3 times, count is 7
-Thread 1 looped 3 times, count is 8
-Thread 1 looped 4 times, count is 9
-Thread 0 looped 4 times, count is 10
-Thread 1 looped 5 times, count is 11
-Thread 0 looped 5 times, count is 12
+Thread 1 looped 5 times, count is 12
 Thread 1 looped 6 times, count is 13
-Thread 1 looped 7 times, count is 14
-Thread 0 looped 6 times, count is 15
-Thread 1 looped 8 times, count is 16
-Thread 0 looped 7 times, count is 17
-Thread 1 looped 9 times, count is 18
-Thread 0 looped 8 times, count is 19
+Thread 0 looped 6 times, count is 14
+Thread 1 looped 7 times, count is 15
+Thread 0 looped 7 times, count is 16
+Thread 1 looped 8 times, count is 17
+Thread 0 looped 8 times, count is 18
+Thread 1 looped 9 times, count is 19
 Thread 0 looped 9 times, count is 20
 Thread 1 looped 10 times, count is 21
 Thread 0 looped 10 times, count is 22
@@ -244,18 +244,18 @@ No threads ready or runnable, and no pending interrupts.
 Assuming the program completed.
 Machine halting!
 
-Ticks: total 1020, idle 80, system 940, user 0
+Ticks: total 864, idle 4, system 860, user 0
 Disk I/O: reads 0, writes 0
 Console I/O: reads 0, writes 0
 Paging: faults 0
 Network I/O: packets received 0, sent 0
 
 Cleaning up...
-nachos -rs 31146 
+nachos -rs 19093 
 Thread 0 looped 0 times, count is 1
 Thread 1 looped 0 times, count is 2
-Thread 0 looped 1 times, count is 3
-Thread 1 looped 1 times, count is 4
+Thread 1 looped 1 times, count is 3
+Thread 0 looped 1 times, count is 4
 Thread 1 looped 2 times, count is 5
 Thread 0 looped 2 times, count is 6
 Thread 1 looped 3 times, count is 7
@@ -265,11 +265,11 @@ Thread 0 looped 4 times, count is 10
 Thread 1 looped 5 times, count is 11
 Thread 0 looped 5 times, count is 12
 Thread 1 looped 6 times, count is 13
-Thread 0 looped 6 times, count is 14
-Thread 1 looped 7 times, count is 15
+Thread 1 looped 7 times, count is 14
+Thread 0 looped 6 times, count is 15
 Thread 1 looped 8 times, count is 16
-Thread 0 looped 7 times, count is 17
-Thread 1 looped 9 times, count is 18
+Thread 1 looped 9 times, count is 17
+Thread 0 looped 7 times, count is 18
 Thread 0 looped 8 times, count is 19
 Thread 1 looped 10 times, count is 20
 Thread 0 looped 9 times, count is 21
@@ -280,14 +280,14 @@ No threads ready or runnable, and no pending interrupts.
 Assuming the program completed.
 Machine halting!
 
-Ticks: total 930, idle 70, system 860, user 0
+Ticks: total 944, idle 14, system 930, user 0
 Disk I/O: reads 0, writes 0
 Console I/O: reads 0, writes 0
 Paging: faults 0
 Network I/O: packets received 0, sent 0
 
 Cleaning up...
-nachos -rs 16569 
+nachos -rs 4351 
 Thread 0 looped 0 times, count is 1
 Thread 1 looped 0 times, count is 2
 Thread 0 looped 1 times, count is 3
@@ -300,8 +300,8 @@ Thread 0 looped 4 times, count is 9
 Thread 1 looped 4 times, count is 10
 Thread 1 looped 5 times, count is 11
 Thread 0 looped 5 times, count is 12
-Thread 1 looped 6 times, count is 13
-Thread 0 looped 6 times, count is 14
+Thread 0 looped 6 times, count is 13
+Thread 1 looped 6 times, count is 14
 Thread 0 looped 7 times, count is 15
 Thread 1 looped 7 times, count is 16
 Thread 0 looped 8 times, count is 17
@@ -316,43 +316,43 @@ No threads ready or runnable, and no pending interrupts.
 Assuming the program completed.
 Machine halting!
 
-Ticks: total 918, idle 18, system 900, user 0
+Ticks: total 1029, idle 129, system 900, user 0
 Disk I/O: reads 0, writes 0
 Console I/O: reads 0, writes 0
 Paging: faults 0
 Network I/O: packets received 0, sent 0
 
 Cleaning up...
-nachos -rs 18887 
+nachos -rs 24272 
 Thread 0 looped 0 times, count is 1
 Thread 1 looped 0 times, count is 2
 Thread 0 looped 1 times, count is 3
 Thread 1 looped 1 times, count is 4
-Thread 1 looped 2 times, count is 5
-Thread 0 looped 2 times, count is 6
+Thread 0 looped 2 times, count is 5
+Thread 1 looped 2 times, count is 6
 Thread 0 looped 3 times, count is 7
 Thread 1 looped 3 times, count is 8
 Thread 0 looped 4 times, count is 9
 Thread 1 looped 4 times, count is 10
 Thread 0 looped 5 times, count is 11
 Thread 1 looped 5 times, count is 12
-Thread 1 looped 6 times, count is 13
-Thread 0 looped 6 times, count is 14
-Thread 1 looped 7 times, count is 15
-Thread 0 looped 7 times, count is 16
-Thread 1 looped 8 times, count is 17
-Thread 0 looped 8 times, count is 18
-Thread 1 looped 9 times, count is 19
-Thread 0 looped 9 times, count is 20
-Thread 1 looped 10 times, count is 21
-Thread 0 looped 10 times, count is 22
-Thread 1 looped 11 times, count is 23
-Thread 0 looped 11 times, count is 24
+Thread 0 looped 6 times, count is 13
+Thread 1 looped 6 times, count is 14
+Thread 0 looped 7 times, count is 15
+Thread 1 looped 7 times, count is 16
+Thread 0 looped 8 times, count is 17
+Thread 1 looped 8 times, count is 18
+Thread 0 looped 9 times, count is 19
+Thread 1 looped 9 times, count is 20
+Thread 0 looped 10 times, count is 21
+Thread 0 looped 11 times, count is 22
+Thread 1 looped 10 times, count is 23
+Thread 1 looped 11 times, count is 24
 No threads ready or runnable, and no pending interrupts.
 Assuming the program completed.
 Machine halting!
 
-Ticks: total 897, idle 57, system 840, user 0
+Ticks: total 951, idle 41, system 910, user 0
 Disk I/O: reads 0, writes 0
 Console I/O: reads 0, writes 0
 Paging: faults 0
