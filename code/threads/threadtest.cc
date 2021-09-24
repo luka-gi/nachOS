@@ -12,7 +12,23 @@
 #include "copyright.h"
 #include "system.h"
 
-//Begin code changes by Lucas Blanchard
+//Begin proj2 changes by Lucas Blanchard
+//global variable for use in shoutingThreads task, moved here from proj1
+int numShouts;
+
+//other global variables. M,P,S can have different assignments depending on the task
+int M;
+int P;
+int S;
+//for task 1
+bool allSit;
+//protects shared counting variables (for busy waiting)
+bool MAvail;
+bool NFAvail;
+//End proj2 changes by Lucas Blanchard
+
+//Begin proj1 code changes by Lucas Blanchard
+
 void inputIdentification(int which)
 {
     //initialize arbitrary sized array for input storage
@@ -219,6 +235,23 @@ bool inputOverflow(char *input)
     return false;
 }
 
+//Begin proj2 code changes by Lucas Blanchard
+
+//test function which acts as a random CPU yield
+void randYield()
+{
+    if ((Random() % 5) == 0)
+    {
+        currentThread->Yield();
+    }
+}
+
+void busyPhilos(int which)
+{
+    //////////////
+}
+//End proj2 code changes by Lucas Blanchard
+
 //ThreadTest() run by nachos
 void ThreadTest()
 {
@@ -305,7 +338,84 @@ void ThreadTest()
             t->Fork(shoutingThreads, i);
         }
     }
+    //Begin proj2 code changes by Lucas Blanchard
+    else if (projTask == 3)
+    {
+        //prompt and capture valid input
+        //arrSize input of 8 should be plenty (nearly 1 mil threads)
+        int arrSize = 8;
+        char *MInput = new char[arrSize];
+        char *PInput = new char[arrSize];
+
+        bool validInput = false;
+
+        //M validation
+        printf("enter number of meals to be eaten, whitespaces don't count and input bytesize must be %d or less: ", arrSize);
+        fgets(MInput, arrSize, stdin);
+
+        while (!validInput)
+        {
+            //input size > max size is invalid
+            if (inputOverflow(MInput))
+            {
+                printf("input overflow error. enter number of meals to be eaten (size %d): ", arrSize);
+                fgets(MInput, arrSize, stdin);
+            }
+            //only integers are valid
+            else if (!isInteger(MInput))
+            {
+                printf("that was not an integer. enter number of meals to be eaten (size %d): ", arrSize);
+                fgets(MInput, arrSize, stdin);
+            }
+            //input is valid, accept input
+            else
+            {
+                validInput = true;
+                M = atoi(MInput);
+            }
+        }
+
+        //P validation
+        validInput = false;
+        printf("enter number of philosophers to dine, whitespaces don't count and input bytesize must be %d or less: ", arrSize);
+        fgets(PInput, arrSize, stdin);
+
+        while (!validInput)
+        {
+            //input size > max size is invalid
+            if (inputOverflow(PInput))
+            {
+                printf("input overflow error. enter number of philosophers to dine (size %d): ", arrSize);
+                fgets(PInput, arrSize, stdin);
+            }
+            //only integers are valid
+            else if (!isInteger(PInput))
+            {
+                printf("that was not an integer. enter number of philosophers to dine (size %d): ", arrSize);
+                fgets(PInput, arrSize, stdin);
+            }
+            //input is valid, accept input
+            else
+            {
+                validInput = true;
+                P = atoi(PInput);
+            }
+        }
+
+        //input validation complete
+        for (int i = 0; i < P; i++)
+        {
+            int threadNameMaxLen = strlen("Philosopher Thread 1000000");
+            char *buf = new char[threadNameMaxLen];
+            snprintf(buf, threadNameMaxLen, "Philosopher Thread %d", i);
+
+            Thread *t = new Thread(buf);
+            t->Fork(busyPhilos, i);
+        }
+    }
+    //End proj2 code changes by Lucas Blanchard
+
     //yield and end main thread once forked, or once illegal projTask value is passed
     currentThread->Finish();
 }
-//End code changes by Lucas Blanchard
+//End proj1 code changes by Lucas Blanchard

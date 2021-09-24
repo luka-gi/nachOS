@@ -29,7 +29,7 @@ extern Interrupt *interrupt;		// interrupt status
 extern Statistics *stats;			// performance metrics
 extern Timer *timer;				// the hardware alarm clock
 
-//Begin code changes by Lucas Blanchard
+//Begin proj1 code changes by Lucas Blanchard
 extern int projTask;
 extern int numShouts;
 
@@ -38,7 +38,10 @@ extern bool isDecimal(char *input);
 extern bool isNegInt(char *input);
 extern bool isNegDec(char *input);
 extern bool inputOverflow(char *input);
-//End code changes by Lucas Blanchard
+//End proj1 code changes by Lucas Blanchard
+//Begin proj2 code chcanges by Lucas Blanchard
+
+//End proj2 code changes by Lucas Blanchard
 
 #ifdef USER_PROGRAM
 #include "machine.h"

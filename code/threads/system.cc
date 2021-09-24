@@ -19,11 +19,10 @@ Statistics *stats;           // performance metrics
 Timer *timer;                // the hardware timer device,
                              // for invoking context switches
 
-//Begin code changes by Lucas Blanchard
+//Begin proj1 code changes by Lucas Blanchard
+//initialize as obviously invalid option
 int projTask = -1;
-
-int numShouts;
-//End code changes by Lucas Blanchard
+//End proj1 code changes by Lucas Blanchard
 
 #ifdef FILESYS_NEEDED
 FileSystem *fileSystem;
@@ -116,12 +115,15 @@ void Initialize(int argc, char **argv)
             randomYield = TRUE;
             argCount = 2;
         }
-        //Begin code changes by Lucas Blanchard
+        //Begin proj1 code changes by Lucas Blanchard
         else if (!strcmp(*argv, "-A"))
         {
             //segfault occurs if no arguments are passed and accessed anyway
             //also check if any of the possible entries were valid
-            if (argc > 1 && (!strcmp(*(argv + 1), "1") || !strcmp(*(argv + 1), "2")))
+
+            //Begin proj2 code changes by Lucas Blanchard
+            if (argc > 1 && (!strcmp(*(argv + 1), "1") || !strcmp(*(argv + 1), "2") || !strcmp(*(argv + 1), "3") || !strcmp(*(argv + 1), "4") || !strcmp(*(argv + 1), "5") || !strcmp(*(argv + 1), "6") || !strcmp(*(argv + 1), "b2")))
+            //End proj2 code changes by Lucas Blanchard
             {
                 projTask = atoi(*(argv + 1));
                 argCount = 2;
@@ -133,7 +135,7 @@ void Initialize(int argc, char **argv)
                 printf("\nerror, input provided to the flag -A was invalid\n\n");
             }
         }
-        //End code changes by Lucas Blanchard
+        //End proj1 code changes by Lucas Blanchard
 
 #ifdef USER_PROGRAM
         if (!strcmp(*argv, "-s"))
