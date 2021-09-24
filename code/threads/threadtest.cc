@@ -13,7 +13,7 @@
 #include "system.h"
 
 //Begin proj2 changes by Lucas Blanchard
-//global variable for use in shoutingThreads task, moved here from proj1
+//global variable for use in shoutingThreads task, moved here from system.h
 int numShouts;
 
 //other global variables. M,P,S can have different assignments depending on the task
@@ -21,10 +21,12 @@ int M;
 int P;
 int S;
 //for task 1
-bool allSit;
+bool allSat = 0;
+int notFinished = 0; //num of philos not finished last meal
+bool *chopSticks;
 //protects shared counting variables (for busy waiting)
-bool MAvail;
-bool NFAvail;
+bool MAvail = 1;
+bool NFAvail = 1;
 //End proj2 changes by Lucas Blanchard
 
 //Begin proj1 code changes by Lucas Blanchard
@@ -237,7 +239,7 @@ bool inputOverflow(char *input)
 
 //Begin proj2 code changes by Lucas Blanchard
 
-//test function which acts as a random CPU yield
+//test functions which acts as CPU yields
 void randYield()
 {
     if ((Random() % 5) == 0)
@@ -246,9 +248,112 @@ void randYield()
     }
 }
 
+void busyWait(int min, int max)
+{
+    int numYields = min + Random() % (max - min + 1);
+    for (int i = 0; i < numYields; i++)
+    {
+        currentThread->Yield();
+    }
+}
+
+//task 1 philosopher code
 void busyPhilos(int which)
 {
-    //////////////
+    //busy waiting loop until ALL threads are created
+    while (!allSat)
+    {
+        currentThread->Yield();
+    }
+
+    //while there are meals available
+    while (M)
+    {
+        //make sure we have both chopsticks
+        int chopCount;
+        while (chopCount != 2)
+        {
+            chopCount = 0;
+            //wait until left chopstick available
+            while (!chopSticks[which])
+            {
+                currentThread->Yield();
+            }
+            //pick up chopstick, mark it unavailable, inc chopCount
+            chopSticks[which] = 0;
+            chopCount++;
+            printf("\n-Philosopher %d has picked up left chopstick", which);
+
+            //attempt maxtrials amount of times to pick up the right chopstick
+            int maxTrials = 5;
+            int countTrials = 0;
+            for (int i = 0; i < maxTrials; i++)
+            {
+                //if right chopstick unavailable, yield and wait until the for loop is over
+                if (!chopSticks[(which + 1) % P])
+                {
+                    countTrials++;
+                    currentThread->Yield();
+                }
+                else
+                {
+                    //chopstick IS available
+                    //pick up chopstick, mark it unavailable, inc chopCount, exit the loop
+                    chopSticks[(which + 1) % P] = 0;
+                    printf("\n--Philosopher %d has picked up right chopstick", which);
+                    chopCount++;
+                    break;
+                }
+            }
+
+            //if numTrials did not break, then we did not pick up right chopstick. countTrials did not reach maxTrials. therefore give up left chopstick
+            //we will restart this while loop because chopCount did not get incremented to 2
+            //yield a random number of times as in network collision prevention
+            //prevents this thread from immediately accessing the same data, thus causing another deadlock
+            if (countTrials == maxTrials)
+            {
+                chopSticks[which] = 1;
+                printf("\n----To prevent deadlock, philosopher %d politely dropped left chopstick", which);
+                busyWait(0, 10);
+            }
+        }
+
+        //if there is still a meal despite random thread yields, then we are allowed to eat
+        if (M)
+        {
+            //wait for M to finish being modified
+            while (!MAvail)
+            {
+                currentThread->Yield();
+            }
+            //make M unavailale, decrement, then make M available
+            MAvail = 0;
+            M--;
+            printf("\n---Philosopher %d has begun eating. Meals remaining: %d", which, M);
+            MAvail = 1;
+            //complete the actual eating
+            busyWait(3, 6);
+        }
+
+        //drop both chopsticks
+        printf("\n----Philosopher %d has dropped left chopstick", which);
+        chopSticks[which] = 1;
+        printf("\n-----Philosopher %d has dropped right chopstick", which);
+        chopSticks[(which + 1) % P] = 1;
+
+        //think after eating
+        printf("\n------Philosopher %d has begun thinking", which);
+        busyWait(3, 6);
+    }
+    //wait for notFinished to finish being modified
+    while (!NFAvail)
+    {
+        currentThread->Yield();
+    }
+    NFAvail = 0;
+    notFinished--;
+    NFAvail = 1;
+    printf("\n-------Philosopher %d has finished their last meal", which);
 }
 //End proj2 code changes by Lucas Blanchard
 
@@ -342,8 +447,8 @@ void ThreadTest()
     else if (projTask == 3)
     {
         //prompt and capture valid input
-        //arrSize input of 8 should be plenty (nearly 1 mil threads)
-        int arrSize = 8;
+        //arrSize input of 7 should be plenty (99999) to support 10k
+        int arrSize = 7;
         char *MInput = new char[arrSize];
         char *PInput = new char[arrSize];
 
@@ -394,11 +499,25 @@ void ThreadTest()
                 printf("that was not an integer. enter number of philosophers to dine (size %d): ", arrSize);
                 fgets(PInput, arrSize, stdin);
             }
+            //if P = 1, there is only one chopstick to eat a meal
+            else if (atoi(PInput) == 1)
+            {
+                printf("P cannot be equal to 1. enter number of philosophers to dine (size %d): ", arrSize);
+                fgets(PInput, arrSize, stdin);
+            }
             //input is valid, accept input
             else
             {
                 validInput = true;
                 P = atoi(PInput);
+                //since P has been successfully verified, give chopstick array a size of number of philosophers
+                chopSticks = new bool[P];
+                //initialize all chopsticks to 1. this is more clear than assigning 0 to mean "available"
+                for (int i = 0; i < P; i++)
+                {
+                    chopSticks[i] = 1;
+                }
+                notFinished = P;
             }
         }
 
@@ -411,7 +530,17 @@ void ThreadTest()
 
             Thread *t = new Thread(buf);
             t->Fork(busyPhilos, i);
+            printf("\nPhilosopher %d is waiting to be seated", i);
         }
+        //all threads have been forked, therefore they may sit
+        printf("\n\n----------------------All philosophers have been seated---------------------\n");
+        allSat = 1;
+        //now wait for all philosophers to finish eating
+        while (notFinished)
+        {
+            currentThread->Yield();
+        }
+        printf("\n\n--------------------All philosophers have left the table--------------------\n\n");
     }
     //End proj2 code changes by Lucas Blanchard
 

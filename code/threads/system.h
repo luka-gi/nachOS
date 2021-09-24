@@ -31,7 +31,6 @@ extern Timer *timer;				// the hardware alarm clock
 
 //Begin proj1 code changes by Lucas Blanchard
 extern int projTask;
-extern int numShouts;
 
 extern bool isInteger(char *input);
 extern bool isDecimal(char *input);
@@ -39,9 +38,6 @@ extern bool isNegInt(char *input);
 extern bool isNegDec(char *input);
 extern bool inputOverflow(char *input);
 //End proj1 code changes by Lucas Blanchard
-//Begin proj2 code chcanges by Lucas Blanchard
-
-//End proj2 code changes by Lucas Blanchard
 
 #ifdef USER_PROGRAM
 #include "machine.h"
