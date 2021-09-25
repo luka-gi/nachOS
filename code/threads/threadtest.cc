@@ -397,7 +397,6 @@ void semPhilos(int which)
     {
         chopStickSem[which]->P();
         printf("\n-Philosopher %d has picked up left chopstick", which);
-        currentThread->Yield();
         chopStickSem[(which + 1) % P]->P();
         printf("\n--Philosopher %d has picked up right chopstick", which);
 
