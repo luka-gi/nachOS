@@ -31,11 +31,9 @@ bool NFAvail = 1;
 //for task 2
 Semaphore *mealSem = new Semaphore("Meal Semaphore", 1);
 Semaphore *NFSem = new Semaphore("Unfinished Threadcount Semaphore", 1);
-//initialize chopstick semaphore array with expected maximum input
-//MAX NUMBER CURRENTLY SPECIFIED BY INPUT IS 99999
-Semaphore **chopStickSem = new Semaphore *[99999];
 Semaphore *allSatSem = new Semaphore("Thread Startblock Semaphore", 0);
 Semaphore *allLeave = new Semaphore("Thread Deathblock Semaphore", 0);
+Semaphore **chopStickSem;
 //End proj2 changes by Lucas Blanchard
 
 //Begin proj1 code changes by Lucas Blanchard
@@ -701,6 +699,8 @@ void ThreadTest()
                 //initialize chopsticks to place in our array
                 int threadNameMaxLen = strlen("Chopstick Semaphore 99999");
                 char *buf = new char[threadNameMaxLen];
+
+                chopStickSem = new Semaphore *[P];
                 for (int i = 0; i < P; i++)
                 {
                     snprintf(buf, threadNameMaxLen, "Chopstick Semaphore %d", i);
