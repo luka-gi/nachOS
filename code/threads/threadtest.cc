@@ -13,20 +13,29 @@
 #include "system.h"
 
 //Begin proj2 changes by Lucas Blanchard
+//include for semaphore code
+#include "synch.h"
 //global variable for use in shoutingThreads task, moved here from system.h
 int numShouts;
 
-//other global variables. M,P,S can have different assignments depending on the task
+//for task 1
 int M;
 int P;
 int S;
-//for task 1
 bool allSat = 0;
 int notFinished = 0; //num of philos not finished last meal
 bool *chopSticks;
 //protects shared counting variables (for busy waiting)
 bool MAvail = 1;
 bool NFAvail = 1;
+//for task 2
+Semaphore *mealSem = new Semaphore("Meal Semaphore", 1);
+Semaphore *NFSem = new Semaphore("Unfinished Threadcount Semaphore", 1);
+//initialize chopstick semaphore array with expected maximum input
+//MAX NUMBER CURRENTLY SPECIFIED BY INPUT IS 99999
+Semaphore **chopStickSem = new Semaphore *[99999];
+Semaphore *allSatSem = new Semaphore("Thread Startblock Semaphore", 0);
+Semaphore *allLeave = new Semaphore("Thread Deathblock Semaphore", 0);
 //End proj2 changes by Lucas Blanchard
 
 //Begin proj1 code changes by Lucas Blanchard
@@ -285,7 +294,8 @@ void busyPhilos(int which)
             printf("\n-Philosopher %d has picked up left chopstick", which);
 
             //attempt maxtrials amount of times to pick up the right chopstick
-            int maxTrials = 5;
+            //we know eating can take about 7 cycles, so if it lasts any longer than this then it is likely deadlocked
+            int maxTrials = 7;
             int countTrials = 0;
             for (int i = 0; i < maxTrials; i++)
             {
@@ -345,15 +355,100 @@ void busyPhilos(int which)
         printf("\n------Philosopher %d has begun thinking", which);
         busyWait(3, 6);
     }
+
     //wait for notFinished to finish being modified
+    //each thread may only do this once to signify that they are waiting for all threads to finish
+    printf("\n-------Philosopher %d has finished their last meal", which);
     while (!NFAvail)
     {
         currentThread->Yield();
     }
     NFAvail = 0;
     notFinished--;
+    //if this decrement means notFinished == 0, then this is the last thread
+    if (notFinished == 0)
+    {
+        printf("\n\n-----------------All philosophers will now leave the table------------------\n\n");
+    }
     NFAvail = 1;
+
+    //wait indefinitely until final thread is ready to die
+    while (true)
+    {
+        //doesn't matter if this is shared since we're only trying to read 0 or nonzero.
+        if (notFinished == 0)
+        {
+            break;
+        }
+        currentThread->Yield();
+    }
+    printf("--------Philosopher %d is exiting\n", which);
+}
+
+//task 2 philospher code
+void semPhilos(int which)
+{
+    //wait for all threads to be forked first
+    allSatSem->P();
+    allSatSem->V();
+
+    //loop to break out of once M = 0. avoids reading shared resource M.
+    while (true)
+    {
+        chopStickSem[which]->P();
+        printf("\n-Philosopher %d has picked up left chopstick", which);
+        currentThread->Yield();
+        chopStickSem[(which + 1) % P]->P();
+        printf("\n--Philosopher %d has picked up right chopstick", which);
+
+        //hoard M for reading and writing
+        mealSem->P();
+        //there are still meals left
+        if (M != 0)
+        {
+            M--;
+            printf("\n---Philosopher %d has begun eating. Meals remaining: %d", which, M);
+            //release M once finished
+            mealSem->V();
+            //eat
+            busyWait(3, 6);
+
+            //drop chopsticks
+            chopStickSem[which]->V();
+            printf("\n----Philosopher %d has dropped left chopstick", which);
+            chopStickSem[(which + 1) % P]->V();
+            printf("\n-----Philosopher %d has dropped right chopstick", which);
+
+            printf("\n------Philosopher %d has begun thinking", which);
+            busyWait(3, 6);
+        }
+        //there are no longer any meals, we can leave the loop
+        else
+        {
+            mealSem->V();
+            break;
+        }
+    }
+    //drop chopsticks (since the last iteration doesn't enter the first if condition)
+    chopStickSem[which]->V();
+    printf("\n----Philosopher %d has dropped left chopstick", which);
+    chopStickSem[(which + 1) % P]->V();
+    printf("\n-----Philosopher %d has dropped right chopstick", which);
     printf("\n-------Philosopher %d has finished their last meal", which);
+
+    //NF starts from P (num of threads) and is decreased once per thread
+    NFSem->P();
+    notFinished--;
+    //this following statement will only be true for the last thread
+    if (notFinished == 0)
+    {
+        printf("\n\n-----------------All philosophers will now leave the table------------------\n\n");
+        allLeave->V();
+    }
+    NFSem->V();
+    allLeave->P();
+    allLeave->V();
+    printf("--------Philosopher %d is exiting\n", which);
 }
 //End proj2 code changes by Lucas Blanchard
 
@@ -535,12 +630,101 @@ void ThreadTest()
         //all threads have been forked, therefore they may sit
         printf("\n\n----------------------All philosophers have been seated---------------------\n");
         allSat = 1;
-        //now wait for all philosophers to finish eating
-        while (notFinished)
+    }
+    else if (projTask == 4)
+    {
+        //prompt and capture valid input
+        //arrSize input of 7 should be plenty (99999) to support 10k
+        int arrSize = 7;
+        char *MInput = new char[arrSize];
+        char *PInput = new char[arrSize];
+
+        bool validInput = false;
+
+        //M validation
+        printf("enter number of meals to be eaten, whitespaces don't count and input bytesize must be %d or less: ", arrSize);
+        fgets(MInput, arrSize, stdin);
+
+        while (!validInput)
         {
-            currentThread->Yield();
+            //input size > max size is invalid
+            if (inputOverflow(MInput))
+            {
+                printf("input overflow error. enter number of meals to be eaten (size %d): ", arrSize);
+                fgets(MInput, arrSize, stdin);
+            }
+            //only integers are valid
+            else if (!isInteger(MInput))
+            {
+                printf("that was not an integer. enter number of meals to be eaten (size %d): ", arrSize);
+                fgets(MInput, arrSize, stdin);
+            }
+            //input is valid, accept input
+            else
+            {
+                validInput = true;
+                M = atoi(MInput);
+            }
         }
-        printf("\n\n--------------------All philosophers have left the table--------------------\n\n");
+
+        //P validation
+        validInput = false;
+        printf("enter number of philosophers to dine, whitespaces don't count and input bytesize must be %d or less: ", arrSize);
+        fgets(PInput, arrSize, stdin);
+
+        while (!validInput)
+        {
+            //input size > max size is invalid
+            if (inputOverflow(PInput))
+            {
+                printf("input overflow error. enter number of philosophers to dine (size %d): ", arrSize);
+                fgets(PInput, arrSize, stdin);
+            }
+            //only integers are valid
+            else if (!isInteger(PInput))
+            {
+                printf("that was not an integer. enter number of philosophers to dine (size %d): ", arrSize);
+                fgets(PInput, arrSize, stdin);
+            }
+            //if P = 1, there is only one chopstick to eat a meal
+            else if (atoi(PInput) == 1)
+            {
+                printf("P cannot be equal to 1. enter number of philosophers to dine (size %d): ", arrSize);
+                fgets(PInput, arrSize, stdin);
+            }
+            //input is valid, accept input
+            else
+            {
+                validInput = true;
+                P = atoi(PInput);
+                notFinished = P;
+
+                //initialize chopsticks to place in our array
+                int threadNameMaxLen = strlen("Chopstick Semaphore 99999");
+                char *buf = new char[threadNameMaxLen];
+                for (int i = 0; i < P; i++)
+                {
+                    snprintf(buf, threadNameMaxLen, "Chopstick Semaphore %d", i);
+                    chopStickSem[i] = new Semaphore(buf, 1);
+                }
+            }
+        }
+
+        //input validation complete
+        for (int i = 0; i < P; i++)
+        {
+            int threadNameMaxLen = strlen("Philosopher Thread 99999");
+            char *buf = new char[threadNameMaxLen];
+            snprintf(buf, threadNameMaxLen, "Philosopher Thread %d", i);
+
+            Thread *t = new Thread(buf);
+            t->Fork(semPhilos, i);
+            printf("\nPhilosopher %d is waiting to be seated", i);
+        }
+        //all threads have been forked, therefore they may sit
+        printf("\n\n----------------------All philosophers have been seated---------------------\n");
+        //signal to all threads to release their block
+        allSatSem->V();
     }
     //End proj2 code changes by Lucas Blanchard
 
