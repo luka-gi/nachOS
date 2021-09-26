@@ -29,11 +29,12 @@ bool *chopSticks;
 bool MAvail = 1;
 bool NFAvail = 1;
 //for task 2
-Semaphore *mealSem = new Semaphore("Meal Semaphore", 1);
+Semaphore *mealSem = new Semaphore("Meal Variable Semaphore", 1);
 Semaphore *NFSem = new Semaphore("Unfinished Threadcount Semaphore", 1);
 Semaphore *allSatSem = new Semaphore("Thread Startblock Semaphore", 0);
-Semaphore *allLeave = new Semaphore("Thread Deathblock Semaphore", 0);
-Semaphore **chopStickSem;
+Semaphore *allLeaveSem = new Semaphore("Thread Deathblock Semaphore", 0);
+Semaphore *chopStickMutex = new Semaphore("Mutex For Chopstick->Read", 1);
+Semaphore **chopSticksSem;
 //End proj2 changes by Lucas Blanchard
 
 //Begin proj1 code changes by Lucas Blanchard
@@ -393,43 +394,64 @@ void semPhilos(int which)
     //loop to break out of once M = 0. avoids reading shared resource M.
     while (true)
     {
-        chopStickSem[which]->P();
-        printf("\n-Philosopher %d has picked up left chopstick", which);
-        chopStickSem[(which + 1) % P]->P();
-        printf("\n--Philosopher %d has picked up right chopstick", which);
 
-        //hoard M for reading and writing
-        mealSem->P();
-        //there are still meals left
-        if (M != 0)
+        //prevent writing priveliges while we determine of chopsticks are available
+        chopStickMutex->P();
+
+        //since threads cannot steal chopsticks at this moment, we can read the semaphore value
+        //(if the semaphore is RELEASED by another thread during reading and validation, this should not pose an issue)
+        if (chopSticksSem[which]->read() && chopSticksSem[(which + 1) % P]->read())
         {
-            M--;
-            printf("\n---Philosopher %d has begun eating. Meals remaining: %d", which, M);
-            //release M once finished
-            mealSem->V();
-            //eat
-            busyWait(3, 6);
 
-            //drop chopsticks
-            chopStickSem[which]->V();
-            printf("\n----Philosopher %d has dropped left chopstick", which);
-            chopStickSem[(which + 1) % P]->V();
-            printf("\n-----Philosopher %d has dropped right chopstick", which);
+            //chopsticks are available, pick up both as once and release the mutex
+            chopSticksSem[which]->P();
+            printf("\n-Philosopher %d has picked up left chopstick", which);
+            chopSticksSem[(which + 1) % P]->P();
+            printf("\n--Philosopher %d has picked up right chopstick", which);
+            chopStickMutex->V();
 
-            printf("\n------Philosopher %d has begun thinking", which);
-            busyWait(3, 6);
+            //hoard M for reading and writing
+            mealSem->P();
+            //there are still meals left
+            if (M != 0)
+            {
+                M--;
+                printf("\n---Philosopher %d has begun eating. Meals remaining: %d", which, M);
+                //release M once finished
+                mealSem->V();
+                //eat
+                busyWait(3, 6);
+
+                //drop chopsticks
+                chopSticksSem[which]->V();
+                printf("\n----Philosopher %d has dropped left chopstick", which);
+                chopSticksSem[(which + 1) % P]->V();
+                printf("\n-----Philosopher %d has dropped right chopstick", which);
+
+                //if eating is finished start thinking
+                printf("\n------Philosopher %d has begun thinking", which);
+                busyWait(3, 6);
+            }
+            //there are no longer any meals, we can leave the loop
+            else
+            {
+                mealSem->V();
+                break;
+            }
         }
-        //there are no longer any meals, we can leave the loop
         else
         {
-            mealSem->V();
-            break;
+            //release the mutex since chopsticks are not available
+            chopStickMutex->V();
+            printf("\n-Either or both chopsticks are not available to philosopher %d", which);
+            currentThread->Yield();
         }
     }
+
     //drop chopsticks (since the last iteration doesn't enter the first if condition)
-    chopStickSem[which]->V();
+    chopSticksSem[which]->V();
     printf("\n----Philosopher %d has dropped left chopstick", which);
-    chopStickSem[(which + 1) % P]->V();
+    chopSticksSem[(which + 1) % P]->V();
     printf("\n-----Philosopher %d has dropped right chopstick", which);
     printf("\n-------Philosopher %d has finished their last meal", which);
 
@@ -440,11 +462,11 @@ void semPhilos(int which)
     if (notFinished == 0)
     {
         printf("\n\n-----------------All philosophers will now leave the table------------------\n\n");
-        allLeave->V();
+        allLeaveSem->V();
     }
     NFSem->V();
-    allLeave->P();
-    allLeave->V();
+    allLeaveSem->P();
+    allLeaveSem->V();
     printf("--------Philosopher %d is exiting\n", which);
 }
 //End proj2 code changes by Lucas Blanchard
@@ -700,11 +722,11 @@ void ThreadTest()
                 int threadNameMaxLen = strlen("Chopstick Semaphore 99999");
                 char *buf = new char[threadNameMaxLen];
 
-                chopStickSem = new Semaphore *[P];
+                chopSticksSem = new Semaphore *[P];
                 for (int i = 0; i < P; i++)
                 {
                     snprintf(buf, threadNameMaxLen, "Chopstick Semaphore %d", i);
-                    chopStickSem[i] = new Semaphore(buf, 1);
+                    chopSticksSem[i] = new Semaphore(buf, 1);
                 }
             }
         }
