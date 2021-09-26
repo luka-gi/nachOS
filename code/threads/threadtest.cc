@@ -327,6 +327,8 @@ void busyPhilos(int which)
                 busyWait(0, 10);
             }
         }
+        //reset for the next for loop
+        chopCount = 0;
 
         //if there is still a meal despite random thread yields, then we are allowed to eat
         if (M)
@@ -397,6 +399,7 @@ void semPhilos(int which)
     {
         chopStickSem[which]->P();
         printf("\n-Philosopher %d has picked up left chopstick", which);
+        currentThread->Yield();
         chopStickSem[(which + 1) % P]->P();
         printf("\n--Philosopher %d has picked up right chopstick", which);
 
