@@ -122,7 +122,7 @@ void Initialize(int argc, char **argv)
             //also check if any of the possible entries were valid
 
             //Begin proj2 code changes by Lucas Blanchard
-            if (argc > 1 && (!strcmp(*(argv + 1), "1") || !strcmp(*(argv + 1), "2") || !strcmp(*(argv + 1), "3") || !strcmp(*(argv + 1), "4") || !strcmp(*(argv + 1), "5") || !strcmp(*(argv + 1), "6") || !strcmp(*(argv + 1), "b2")))
+            if (argc > 1 && (!strcmp(*(argv + 1), "1") || !strcmp(*(argv + 1), "2") || !strcmp(*(argv + 1), "3") || !strcmp(*(argv + 1), "4") || !strcmp(*(argv + 1), "5") || !strcmp(*(argv + 1), "6") || !strcmp(*(argv + 1), "0")))
             //End proj2 code changes by Lucas Blanchard
             {
                 projTask = atoi(*(argv + 1));

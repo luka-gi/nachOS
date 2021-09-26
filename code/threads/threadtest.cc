@@ -31,9 +31,7 @@ bool NFAvail = 1;
 //for task 2
 Semaphore *mealSem = new Semaphore("Meal Semaphore", 1);
 Semaphore *NFSem = new Semaphore("Unfinished Threadcount Semaphore", 1);
-//initialize chopstick semaphore array with expected maximum input
-//MAX NUMBER CURRENTLY SPECIFIED BY INPUT IS 99999
-Semaphore **chopStickSem = new Semaphore *[99999];
+Semaphore **chopStickSem;
 Semaphore *allSatSem = new Semaphore("Thread Startblock Semaphore", 0);
 Semaphore *allLeave = new Semaphore("Thread Deathblock Semaphore", 0);
 //End proj2 changes by Lucas Blanchard
@@ -399,7 +397,6 @@ void semPhilos(int which)
     {
         chopStickSem[which]->P();
         printf("\n-Philosopher %d has picked up left chopstick", which);
-        currentThread->Yield();
         chopStickSem[(which + 1) % P]->P();
         printf("\n--Philosopher %d has picked up right chopstick", which);
 
@@ -702,6 +699,7 @@ void ThreadTest()
                 notFinished = P;
 
                 //initialize chopsticks to place in our array
+                chopStickSem = new Semaphore *[P];
                 int threadNameMaxLen = strlen("Chopstick Semaphore 99999");
                 char *buf = new char[threadNameMaxLen];
                 for (int i = 0; i < P; i++)
@@ -727,6 +725,15 @@ void ThreadTest()
         printf("\n\n----------------------All philosophers have been seated---------------------\n");
         //signal to all threads to release their block
         allSatSem->V();
+    }
+    else if (projTask == 5)
+    {
+        }
+    else if (projTask == 6)
+    {
+    }
+    else if (projTask == 0)
+    {
     }
     //End proj2 code changes by Lucas Blanchard
 
