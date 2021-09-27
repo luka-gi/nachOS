@@ -18,12 +18,13 @@
 //global variable for use in shoutingThreads task, moved here from system.h
 int numShouts;
 
-//for task 1
+//for various tasks
 int M;
 int P;
 int S;
+//for task 1
 bool allSat = 0;
-int notFinished = 0; //num of philos not finished last meal
+int notFinished = 0; //num of philos who have not finished last meal
 bool *chopSticks;
 //protects shared counting variables (for busy waiting)
 bool MAvail = 1;
@@ -31,9 +32,21 @@ bool NFAvail = 1;
 //for task 2
 Semaphore *mealSem = new Semaphore("Meal Semaphore", 1);
 Semaphore *NFSem = new Semaphore("Unfinished Threadcount Semaphore", 1);
-Semaphore **chopStickSem;
+Semaphore **chopSticksSem;
 Semaphore *allSatSem = new Semaphore("Thread Startblock Semaphore", 0);
-Semaphore *allLeave = new Semaphore("Thread Deathblock Semaphore", 0);
+Semaphore *allLeaveSem = new Semaphore("Thread Deathblock Semaphore", 0);
+//for task 3
+struct Message
+{
+    int sender;
+    char *contents;
+};
+Message ***mailboxes;
+
+Semaphore **mailboxMutexes;
+Semaphore **freeSpacesSem;
+Semaphore **unreadMutexes;
+int **unreadMessages;
 //End proj2 changes by Lucas Blanchard
 
 //Begin proj1 code changes by Lucas Blanchard
@@ -395,9 +408,9 @@ void semPhilos(int which)
     //loop to break out of once M = 0. avoids reading shared resource M.
     while (true)
     {
-        chopStickSem[which]->P();
+        chopSticksSem[which]->P();
         printf("\n-Philosopher %d has picked up left chopstick", which);
-        chopStickSem[(which + 1) % P]->P();
+        chopSticksSem[(which + 1) % P]->P();
         printf("\n--Philosopher %d has picked up right chopstick", which);
 
         //hoard M for reading and writing
@@ -413,9 +426,9 @@ void semPhilos(int which)
             busyWait(3, 6);
 
             //drop chopsticks
-            chopStickSem[which]->V();
+            chopSticksSem[which]->V();
             printf("\n----Philosopher %d has dropped left chopstick", which);
-            chopStickSem[(which + 1) % P]->V();
+            chopSticksSem[(which + 1) % P]->V();
             printf("\n-----Philosopher %d has dropped right chopstick", which);
 
             printf("\n------Philosopher %d has begun thinking", which);
@@ -429,9 +442,9 @@ void semPhilos(int which)
         }
     }
     //drop chopsticks (since the last iteration doesn't enter the first if condition)
-    chopStickSem[which]->V();
+    chopSticksSem[which]->V();
     printf("\n----Philosopher %d has dropped left chopstick", which);
-    chopStickSem[(which + 1) % P]->V();
+    chopSticksSem[(which + 1) % P]->V();
     printf("\n-----Philosopher %d has dropped right chopstick", which);
     printf("\n-------Philosopher %d has finished their last meal", which);
 
@@ -442,13 +455,24 @@ void semPhilos(int which)
     if (notFinished == 0)
     {
         printf("\n\n-----------------All philosophers will now leave the table------------------\n\n");
-        allLeave->V();
+        allLeaveSem->V();
     }
     NFSem->V();
-    allLeave->P();
-    allLeave->V();
+    allLeaveSem->P();
+    allLeaveSem->V();
     printf("--------Philosopher %d is exiting\n", which);
 }
+
+//task 3 philosopher code
+void postOffice(int which)
+{
+    while (true)
+    {
+        printf("\nPerson %d entered the post office\n", which);
+        break;
+    }
+}
+
 //End proj2 code changes by Lucas Blanchard
 
 //ThreadTest() run by nachos
@@ -459,6 +483,7 @@ void ThreadTest()
         Thread *inputIdent = new Thread("Project1_input_identification");
         inputIdent->Fork(inputIdentification, 0);
     }
+
     else if (projTask == 2)
     {
         //5 bytes can hold 0-999 from user input, should be fine for both vals
@@ -538,6 +563,7 @@ void ThreadTest()
         }
     }
     //Begin proj2 code changes by Lucas Blanchard
+
     else if (projTask == 3)
     {
         //prompt and capture valid input
@@ -630,6 +656,7 @@ void ThreadTest()
         printf("\n\n----------------------All philosophers have been seated---------------------\n");
         allSat = 1;
     }
+
     else if (projTask == 4)
     {
         //prompt and capture valid input
@@ -699,13 +726,13 @@ void ThreadTest()
                 notFinished = P;
 
                 //initialize chopsticks to place in our array
-                chopStickSem = new Semaphore *[P];
+                chopSticksSem = new Semaphore *[P];
                 int threadNameMaxLen = strlen("Chopstick Semaphore 99999");
                 char *buf = new char[threadNameMaxLen];
                 for (int i = 0; i < P; i++)
                 {
                     snprintf(buf, threadNameMaxLen, "Chopstick Semaphore %d", i);
-                    chopStickSem[i] = new Semaphore(buf, 1);
+                    chopSticksSem[i] = new Semaphore(buf, 1);
                 }
             }
         }
@@ -726,12 +753,161 @@ void ThreadTest()
         //signal to all threads to release their block
         allSatSem->V();
     }
+
     else if (projTask == 5)
     {
+        //prompt and capture valid input
+        //arrSize input of 7 should be plenty (99999) to support 10k
+        int arrSize = 7;
+        char *MInput = new char[arrSize];
+        char *PInput = new char[arrSize];
+        char *SInput = new char[arrSize];
+
+        //M validation
+        bool validInput = false;
+        printf("enter max number of messages to be sent, whitespaces don't count and input bytesize must be %d or less: ", arrSize);
+        fgets(MInput, arrSize, stdin);
+
+        while (!validInput)
+        {
+            //input size > max size is invalid
+            if (inputOverflow(MInput))
+            {
+                printf("input overflow error. enter max number of messages to be sent (size %d): ", arrSize);
+                fgets(MInput, arrSize, stdin);
+            }
+            //only integers are valid
+            else if (!isInteger(MInput))
+            {
+                printf("that was not an integer. enter max number of messages to be sent (size %d): ", arrSize);
+                fgets(MInput, arrSize, stdin);
+            }
+            //input is valid, accept input
+            else
+            {
+                validInput = true;
+                M = atoi(MInput);
+            }
         }
+
+        //P validation
+        validInput = false;
+        printf("enter number of people to enter post office, whitespaces don't count and input bytesize must be %d or less: ", arrSize);
+        fgets(PInput, arrSize, stdin);
+
+        while (!validInput)
+        {
+            //input size > max size is invalid
+            if (inputOverflow(PInput))
+            {
+                printf("input overflow error. enter number of people to enter post office (size %d): ", arrSize);
+                fgets(PInput, arrSize, stdin);
+            }
+            //only integers are valid
+            else if (!isInteger(PInput))
+            {
+                printf("that was not an integer. enter number of people to enter post office (size %d): ", arrSize);
+                fgets(PInput, arrSize, stdin);
+            }
+            //input is valid, accept input
+            else
+            {
+                validInput = true;
+                P = atoi(PInput);
+            }
+        }
+
+        //S validation
+        validInput = false;
+        printf("enter number of messages per mailbox, whitespaces don't count and input bytesize must be %d or less: ", arrSize);
+        fgets(SInput, arrSize, stdin);
+
+        while (!validInput)
+        {
+            //input size > max size is invalid
+            if (inputOverflow(SInput))
+            {
+                printf("input overflow error. enter number of messages per mailbox (size %d): ", arrSize);
+                fgets(SInput, arrSize, stdin);
+            }
+            //only integers are valid
+            else if (!isInteger(SInput))
+            {
+                printf("that was not an integer. enter number of messages per mailbox (size %d): ", arrSize);
+                fgets(SInput, arrSize, stdin);
+            }
+            //input is valid, accept input
+            else
+            {
+                validInput = true;
+                S = atoi(SInput);
+            }
+        }
+
+        //input has been validated
+        //after collecting P and M, construct the mailbox filled with null
+        mailboxes = new Message **[P];
+        for (int i = 0; i < P; i++)
+        {
+            mailboxes[i] = new Message *[S];
+            for (int j = 0; j < S; j++)
+            {
+                mailboxes[i][j] = NULL;
+            }
+        }
+
+        //initialize mailboxMutexes, to control access to a particular mailbox
+        mailboxMutexes = new Semaphore *[P];
+        int threadNameMaxLen = strlen("Mailbox Mutex 99999");
+        char *buf = new char[threadNameMaxLen];
+        for (int i = 0; i < P; i++)
+        {
+            snprintf(buf, threadNameMaxLen, "Mailbox Mutex %d", i);
+            mailboxMutexes[i] = new Semaphore(buf, 1);
+        }
+
+        //initialize freeSpacesSem, to prevent threads from writing to full mailboxes
+        freeSpacesSem = new Semaphore *[P];
+        threadNameMaxLen = strlen("Free Space Semaphore 99999");
+        buf = new char[threadNameMaxLen];
+        for (int i = 0; i < P; i++)
+        {
+            snprintf(buf, threadNameMaxLen, "Free Space For Mailbox %d", i);
+            freeSpacesSem[i] = new Semaphore(buf, S);
+        }
+
+        //initialize unreadMutexes, to protect the int which shows number of unread messages in a mailbox
+        unreadMutexes = new Semaphore *[P];
+        threadNameMaxLen = strlen("Unread Integer Mutex 99999");
+        buf = new char[threadNameMaxLen];
+        for (int i = 0; i < P; i++)
+        {
+            snprintf(buf, threadNameMaxLen, "Unread Integer Mutex %d", i);
+            unreadMutexes[i] = new Semaphore(buf, 1);
+        }
+
+        //initialize unreadMessages, acts as a pointer to show where a mailbox can be read and written to
+        if (P)
+        {
+            int unreadMessages[P] = {0};
+        }
+
+        //fork all people threads
+        for (int i = 0; i < P; i++)
+        {
+            int threadNameMaxLen = strlen("Person Thread 99999");
+            char *buf = new char[threadNameMaxLen];
+            snprintf(buf, threadNameMaxLen, "Person Thread %d", i);
+
+            Thread *t = new Thread(buf);
+            t->Fork(postOffice, i);
+        }
+    }
+
     else if (projTask == 6)
     {
     }
+
     else if (projTask == 0)
     {
     }
