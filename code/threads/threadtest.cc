@@ -43,6 +43,7 @@ struct Message
 };
 Message ***mailboxes;
 
+Semaphore *MessageSemaphore = new Semaphore("Messages Until Simulation End Semaphore", 1);
 Semaphore **mailboxMutexes;
 Semaphore **freeSpacesSem;
 Semaphore **unreadMutexes;
@@ -468,8 +469,40 @@ void postOffice(int which)
 {
     while (true)
     {
+        //beginning of the loop, start of algorithm
         printf("\nPerson %d entered the post office\n", which);
-        break;
+        MessageSemaphore->P();
+        //don't quit until we are out of messages that are allowed to be sent
+        if (M)
+        {
+            MessageSemaphore->V();
+        }
+        else
+        {
+            MessageSemaphore->V();
+            break;
+        }
+
+        //we are still running the algorithm, read messages in the mailbox until none are left
+        while (true)
+        {
+            unreadMutexes[which]->P();
+            if (unreadMessages[which])
+            {
+                unreadMessages[which]--;
+                unreadMutexes[which]->V();
+                freeSpacesSem[which]->V();
+            }
+            else
+            {
+                unreadMutexes[which]->V();
+                break;
+            }
+            //at this point, we are still reading messages
+            //////////////////////
+            //////////////////////
+            //////////////////////
+        }
     }
 }
 
