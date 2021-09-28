@@ -47,7 +47,7 @@ Semaphore *MessageSemaphore = new Semaphore("Messages Until Simulation End Semap
 Semaphore **mailboxMutexes;
 Semaphore **freeSpacesSem;
 Semaphore **unreadMutexes;
-int **unreadMessages;
+int *unreadMessages;
 //End proj2 changes by Lucas Blanchard
 
 //Begin proj1 code changes by Lucas Blanchard
@@ -475,34 +475,81 @@ void postOffice(int which)
         //don't quit until we are out of messages that are allowed to be sent
         if (M)
         {
+            //decrement M as soon as possible
+            M--;
             MessageSemaphore->V();
         }
-        else
+        else //  quit the program
         {
             MessageSemaphore->V();
+            printf("\nPerson %d exited the post office\n", which);
             break;
         }
 
         //we are still running the algorithm, read messages in the mailbox until none are left
         while (true)
         {
+            //check if there are any unread messages
+            int messageIndex;
             unreadMutexes[which]->P();
             if (unreadMessages[which])
             {
-                unreadMessages[which]--;
+                //decrement num of unread messages
+                //store CURRENT value of unread messages to use as an index
+                messageIndex = --unreadMessages[which];
                 unreadMutexes[which]->V();
-                freeSpacesSem[which]->V();
             }
             else
             {
                 unreadMutexes[which]->V();
                 break;
             }
-            //at this point, we are still reading messages
-            //////////////////////
-            //////////////////////
-            //////////////////////
+            //at this point, we read out the message
+            mailboxMutexes[which]->P();
+            char *contents = mailboxes[which][messageIndex]->contents;
+            int sender = mailboxes[which][messageIndex]->sender;
+            mailboxes[which][messageIndex] = NULL;
+            mailboxMutexes[which]->V();
+
+            printf("\nP%d has read the following message from P%d: '%s'", which, sender, contents);
+
+            //signify that there is a free message space
+            freeSpacesSem[which]->V();
+
+            //Yield as per the algorithm
+            currentThread->Yield();
         }
+
+        //we have finished with reading messages, now to compose one
+        Message *toSend = new Message;
+        ////////////////////////////////////////
+        ////////////////////////////////////////
+        ////////////////////////////////////////
+        char *msgToSend = new char[50];
+        msgToSend = "TEST MESSAGE";
+        ////////////////////////////////////////
+        ////////////////////////////////////////
+        ////////////////////////////////////////
+        int reciever = -1;
+        while (reciever == which || reciever == -1)
+        {
+            reciever = Random() % P;
+        }
+        toSend->contents = msgToSend;
+        toSend->sender = which;
+
+        freeSpacesSem[reciever]->P();
+
+        unreadMutexes[reciever]->P();
+        int recieverUnreadMessages = unreadMessages[reciever]++;
+        unreadMutexes[reciever]->V();
+
+        mailboxMutexes[reciever]->P();
+        mailboxes[reciever][recieverUnreadMessages] = toSend;
+        mailboxMutexes[reciever]->V();
+
+        printf("\nPerson %d exited the post office\n", which);
+        busyWait(3, 6);
     }
 }
 
@@ -891,30 +938,30 @@ void ThreadTest()
 
         //initialize mailboxMutexes, to control access to a particular mailbox
         mailboxMutexes = new Semaphore *[P];
-        int threadNameMaxLen = strlen("Mailbox Mutex 99999");
-        char *buf = new char[threadNameMaxLen];
         for (int i = 0; i < P; i++)
         {
+            int threadNameMaxLen = strlen("Mailbox Mutex 99999");
+            char *buf = new char[threadNameMaxLen];
             snprintf(buf, threadNameMaxLen, "Mailbox Mutex %d", i);
             mailboxMutexes[i] = new Semaphore(buf, 1);
         }
 
         //initialize freeSpacesSem, to prevent threads from writing to full mailboxes
         freeSpacesSem = new Semaphore *[P];
-        threadNameMaxLen = strlen("Free Space Semaphore 99999");
-        buf = new char[threadNameMaxLen];
         for (int i = 0; i < P; i++)
         {
+            int threadNameMaxLen = strlen("Free Space Semaphore 99999");
+            char *buf = new char[threadNameMaxLen];
             snprintf(buf, threadNameMaxLen, "Free Space For Mailbox %d", i);
             freeSpacesSem[i] = new Semaphore(buf, S);
         }
 
         //initialize unreadMutexes, to protect the int which shows number of unread messages in a mailbox
         unreadMutexes = new Semaphore *[P];
-        threadNameMaxLen = strlen("Unread Integer Mutex 99999");
-        buf = new char[threadNameMaxLen];
         for (int i = 0; i < P; i++)
         {
+            int threadNameMaxLen = strlen("Unread Integer Mutex 99999");
+            char *buf = new char[threadNameMaxLen];
             snprintf(buf, threadNameMaxLen, "Unread Integer Mutex %d", i);
             unreadMutexes[i] = new Semaphore(buf, 1);
         }
@@ -922,7 +969,11 @@ void ThreadTest()
         //initialize unreadMessages, acts as a pointer to show where a mailbox can be read and written to
         if (P)
         {
-            int unreadMessages[P] = {0};
+            unreadMessages = new int[P];
+            for (int i = 0; i < P; i++)
+            {
+                unreadMessages[i] = 0;
+            }
         }
 
         //fork all people threads
