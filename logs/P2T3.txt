@@ -1,0 +1,46 @@
+enter max number of messages to be sent, whitespaces don't count and input bytesize must be 7 or less: enter number of people to enter post office, whitespaces don't count and input bytesize must be 7 or less: enter number of messages per mailbox, whitespaces don't count and input bytesize must be 7 or less: 
+-Person 0 entered the post office
+------Person 0 has decided to send the message 'TEST MESSAGE' to Person 2
+-------Person 0 placed a message in Person 2's mailbox
+--------Person 0 exited the post office
+-Person 1 entered the post office
+------Person 1 has decided to send the message 'TEST MESSAGE' to Person 0
+-Person 2 entered the post office
+--Person 2 has read the following message from Person 0: 'TEST MESSAGE'
+---Person 2 is letting everyone know that they have another slot
+----Person 2 is letting the next person in line
+-----Person 2 is checking for more messages to read
+------Person 2 has decided to send the message 'TEST MESSAGE' to Person 1
+-------Person 2 placed a message in Person 1's mailbox
+--------Person 2 exited the post office
+-------Person 1 placed a message in Person 0's mailbox
+--------Person 1 exited the post office
+-Person 0 entered the post office
+--Person 0 has read the following message from Person 1: 'TEST MESSAGE'
+---Person 0 is letting everyone know that they have another slot
+----Person 0 is letting the next person in line
+-----Person 0 is checking for more messages to read
+------Person 0 has decided to send the message 'TEST MESSAGE' to Person 1
+--------Person 0 exited the post office
+-Person 2 entered the post office
+------Person 2 has decided to send the message 'TEST MESSAGE' to Person 0
+--------Person 2 exited the post office
+-Person 1 entered the post office
+--Person 1 has read the following message from Person 2: 'TEST MESSAGE'
+---Person 1 is letting everyone know that they have another slot
+----Person 1 is letting the next person in line
+-----Person 1 is checking for more messages to read
+------Person 1 has decided to send the message 'TEST MESSAGE' to Person 2
+--------Person 1 exited the post office
+
+No threads ready or runnable, and no pending interrupts.
+Assuming the program completed.
+Machine halting!
+
+Ticks: total 915, idle 75, system 840, user 0
+Disk I/O: reads 0, writes 0
+Console I/O: reads 0, writes 0
+Paging: faults 0
+Network I/O: packets received 0, sent 0
+
+Cleaning up...

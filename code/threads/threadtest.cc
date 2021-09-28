@@ -464,27 +464,13 @@ void semPhilos(int which)
     printf("--------Philosopher %d is exiting\n", which);
 }
 
-//task 3 philosopher code
+//task 3 postOffice code
 void postOffice(int which)
 {
     while (true)
     {
         //beginning of the loop, start of algorithm
-        printf("\nPerson %d entered the post office\n", which);
-        MessageSemaphore->P();
-        //don't quit until we are out of messages that are allowed to be sent
-        if (M)
-        {
-            //decrement M as soon as possible
-            M--;
-            MessageSemaphore->V();
-        }
-        else //  quit the program
-        {
-            MessageSemaphore->V();
-            printf("\nPerson %d exited the post office\n", which);
-            break;
-        }
+        printf("\n-Person %d entered the post office", which);
 
         //we are still running the algorithm, read messages in the mailbox until none are left
         while (true)
@@ -511,44 +497,68 @@ void postOffice(int which)
             mailboxes[which][messageIndex] = NULL;
             mailboxMutexes[which]->V();
 
-            printf("\nP%d has read the following message from P%d: '%s'", which, sender, contents);
+            printf("\n--Person %d has read the following message from Person %d: '%s'", which, sender, contents);
 
             //signify that there is a free message space
+            printf("\n---Person %d is letting everyone know that they have another slot", which);
             freeSpacesSem[which]->V();
 
             //Yield as per the algorithm
+            printf("\n----Person %d is letting the next person in line", which);
             currentThread->Yield();
-        }
 
+            printf("\n-----Person %d is checking for more messages to read", which);
+        }
         //we have finished with reading messages, now to compose one
         Message *toSend = new Message;
         ////////////////////////////////////////
         ////////////////////////////////////////
         ////////////////////////////////////////
-        char *msgToSend = new char[50];
-        msgToSend = "TEST MESSAGE";
+        char *contents = new char[50];
+        contents = "TEST MESSAGE";
         ////////////////////////////////////////
         ////////////////////////////////////////
         ////////////////////////////////////////
+        //randomly decide which Person to send to, and compose a Message struct
         int reciever = -1;
         while (reciever == which || reciever == -1)
         {
             reciever = Random() % P;
         }
-        toSend->contents = msgToSend;
+        toSend->contents = contents;
         toSend->sender = which;
 
-        freeSpacesSem[reciever]->P();
+        MessageSemaphore->P();
+        if (M)
+        {
+            printf("\n------Person %d has decided to send the message '%s' to Person %d", which, contents, reciever);
 
-        unreadMutexes[reciever]->P();
-        int recieverUnreadMessages = unreadMessages[reciever]++;
-        unreadMutexes[reciever]->V();
+            //decrement total M
+            M--;
+            MessageSemaphore->V();
 
-        mailboxMutexes[reciever]->P();
-        mailboxes[reciever][recieverUnreadMessages] = toSend;
-        mailboxMutexes[reciever]->V();
+            //signal that the reciever is losing a free slot
+            freeSpacesSem[reciever]->P();
 
-        printf("\nPerson %d exited the post office\n", which);
+            //increase number of unread messages so the reciever knows where to read from first
+            unreadMutexes[reciever]->P();
+            int recieverUnreadMessages = unreadMessages[reciever]++;
+            unreadMutexes[reciever]->V();
+
+            //actually place the message into the mailbox of the reciever
+            mailboxMutexes[reciever]->P();
+            mailboxes[reciever][recieverUnreadMessages] = toSend;
+            mailboxMutexes[reciever]->V();
+
+            printf("\n-------Person %d placed a message in Person %d's mailbox", which, reciever);
+        }
+        else
+        {
+            MessageSemaphore->V();
+            printf("\n--------Person %d exited the post office because no more messages can be sent", which);
+            break;
+        }
+        printf("\n--------Person %d exited the post office", which);
         busyWait(3, 6);
     }
 }
