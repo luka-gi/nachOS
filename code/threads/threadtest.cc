@@ -46,7 +46,6 @@ Message ***mailboxes;
 Semaphore *MessageSemaphore = new Semaphore("Messages Until Simulation End Semaphore", 1);
 Semaphore **mailboxMutexes;
 Semaphore **freeSpacesSem;
-Semaphore **unreadMutexes;
 int *unreadMessages;
 //End proj2 changes by Lucas Blanchard
 
@@ -416,31 +415,30 @@ void semPhilos(int which)
 
         //hoard M for reading and writing
         mealSem->P();
-        //there are still meals left
-        if (M != 0)
-        {
-            M--;
-            printf("\n---Philosopher %d has begun eating. Meals remaining: %d", which, M);
-            //release M once finished
-            mealSem->V();
-            //eat
-            busyWait(3, 6);
 
-            //drop chopsticks
-            chopSticksSem[which]->V();
-            printf("\n----Philosopher %d has dropped left chopstick", which);
-            chopSticksSem[(which + 1) % P]->V();
-            printf("\n-----Philosopher %d has dropped right chopstick", which);
-
-            printf("\n------Philosopher %d has begun thinking", which);
-            busyWait(3, 6);
-        }
         //there are no longer any meals, we can leave the loop
-        else
+        if (!M)
         {
             mealSem->V();
             break;
         }
+
+        //there are still meals left
+        M--;
+        printf("\n---Philosopher %d has begun eating. Meals remaining: %d", which, M);
+        //release M once finished
+        mealSem->V();
+        //eat
+        busyWait(3, 6);
+
+        //drop chopsticks
+        chopSticksSem[which]->V();
+        printf("\n----Philosopher %d has dropped left chopstick", which);
+        chopSticksSem[(which + 1) % P]->V();
+        printf("\n-----Philosopher %d has dropped right chopstick", which);
+
+        printf("\n------Philosopher %d has begun thinking", which);
+        busyWait(3, 6);
     }
     //drop chopsticks (since the last iteration doesn't enter the first if condition)
     chopSticksSem[which]->V();
@@ -464,6 +462,56 @@ void semPhilos(int which)
     printf("--------Philosopher %d is exiting\n", which);
 }
 
+char *getRandMsg()
+{
+    int chooseShout = Random() % 11;
+
+    if (chooseShout == 0)
+    {
+        return "Sit down at table.";
+    }
+    else if (chooseShout == 1)
+    {
+        return "Pick up left chopstick.";
+    }
+    else if (chooseShout == 2)
+    {
+        return "Pick up right chopstick.";
+    }
+    else if (chooseShout == 3)
+    {
+        return "Begin eating.";
+    }
+    else if (chooseShout == 4)
+    {
+        return "Continue eating for 3-6 cycles.";
+    }
+    else if (chooseShout == 5)
+    {
+        return "Put down left chopstick.";
+    }
+    else if (chooseShout == 6)
+    {
+        return "Put down right chopstick.";
+    }
+    else if (chooseShout == 7)
+    {
+        return "Begin thinking.";
+    }
+    else if (chooseShout == 8)
+    {
+        return "Continue thinking for 3-6 cycles.";
+    }
+    else if (chooseShout == 9)
+    {
+        return "IF all meals have not been eaten, GOTO 2.";
+    }
+    else if (chooseShout == 10)
+    {
+        return "ELSE leave the table.";
+    }
+}
+
 //task 3 postOffice code
 void postOffice(int which)
 {
@@ -477,49 +525,45 @@ void postOffice(int which)
         {
             //check if there are any unread messages
             int messageIndex;
-            unreadMutexes[which]->P();
-            if (unreadMessages[which])
+            mailboxMutexes[which]->P();
+            //if no unread messages, unblock the semaphore leave the loop
+            if (!unreadMessages[which])
             {
-                //decrement num of unread messages
-                //store CURRENT value of unread messages to use as an index
-                messageIndex = --unreadMessages[which];
-                unreadMutexes[which]->V();
-            }
-            else
-            {
-                unreadMutexes[which]->V();
+                mailboxMutexes[which]->V();
                 break;
             }
+
+            //decrement num of unread messages
+            //store CURRENT value of unread messages to use as an index
+            messageIndex = --unreadMessages[which];
+
             //at this point, we read out the message
-            mailboxMutexes[which]->P();
             char *contents = mailboxes[which][messageIndex]->contents;
             int sender = mailboxes[which][messageIndex]->sender;
             mailboxes[which][messageIndex] = NULL;
             mailboxMutexes[which]->V();
 
-            printf("\n--Person %d has read the following message from Person %d: '%s'", which, sender, contents);
+            printf("\n--Person %d has read the message '%s' from Person %d", which, contents, sender);
 
             //signify that there is a free message space
-            printf("\n---Person %d is letting everyone know that they have another slot", which);
+            printf("\n---Person %d has called V() on their mailbox", which);
             freeSpacesSem[which]->V();
 
             //Yield as per the algorithm
-            printf("\n----Person %d is letting the next person in line", which);
+            printf("\n----Person %d is yielding their turn", which);
             currentThread->Yield();
 
             printf("\n-----Person %d is checking for more messages to read", which);
         }
+
+        printf("\n------Person %d's mailbox is empty", which);
+
         //we have finished with reading messages, now to compose one
         Message *toSend = new Message;
-        ////////////////////////////////////////
-        ////////////////////////////////////////
-        ////////////////////////////////////////
-        char *contents = new char[50];
-        contents = "TEST MESSAGE";
-        ////////////////////////////////////////
-        ////////////////////////////////////////
-        ////////////////////////////////////////
-        //randomly decide which Person to send to, and compose a Message struct
+
+        char *contents = getRandMsg();
+
+        // randomly decide which Person to send to, and compose a Message struct
         int reciever = -1;
         while (reciever == which || reciever == -1)
         {
@@ -528,36 +572,32 @@ void postOffice(int which)
         toSend->contents = contents;
         toSend->sender = which;
 
+        printf("\n------Person %d has composed the message '%s' for Person %d", which, contents, reciever);
+
+        //block M before reading, and if M=0, exit the simulation
         MessageSemaphore->P();
-        if (M)
-        {
-            printf("\n------Person %d has decided to send the message '%s' to Person %d", which, contents, reciever);
-
-            //decrement total M
-            M--;
-            MessageSemaphore->V();
-
-            //signal that the reciever is losing a free slot
-            freeSpacesSem[reciever]->P();
-
-            //increase number of unread messages so the reciever knows where to read from first
-            unreadMutexes[reciever]->P();
-            int recieverUnreadMessages = unreadMessages[reciever]++;
-            unreadMutexes[reciever]->V();
-
-            //actually place the message into the mailbox of the reciever
-            mailboxMutexes[reciever]->P();
-            mailboxes[reciever][recieverUnreadMessages] = toSend;
-            mailboxMutexes[reciever]->V();
-
-            printf("\n-------Person %d placed a message in Person %d's mailbox", which, reciever);
-        }
-        else
+        if (!M)
         {
             MessageSemaphore->V();
-            printf("\n--------Person %d exited the post office because no more messages can be sent", which);
+            printf("\n---------Person %d exited the post office because no more messages can be sent", which);
             break;
         }
+
+        //decrement total M. if we are at this point, we are definitely sending the constructed message.
+        M--;
+        MessageSemaphore->V();
+
+        //signal that the reciever is losing a free slot
+        freeSpacesSem[reciever]->P();
+
+        //increase number of unread messages so the reciever knows where to read from first
+        mailboxMutexes[reciever]->P();
+        int recieverUnreadMessages = unreadMessages[reciever]++;
+        //actually place the message into the mailbox of the reciever
+        mailboxes[reciever][recieverUnreadMessages] = toSend;
+        mailboxMutexes[reciever]->V();
+
+        printf("\n-------Person %d sent the message '%s' to Person %d's mailbox and called P()", which, contents, reciever);
         printf("\n--------Person %d exited the post office", which);
         busyWait(3, 6);
     }
@@ -899,6 +939,12 @@ void ThreadTest()
                 printf("that was not an integer. enter number of people to enter post office (size %d): ", arrSize);
                 fgets(PInput, arrSize, stdin);
             }
+            //if P = 1, P0 cannot send message to a thread that isn't itself
+            else if (atoi(PInput) == 1)
+            {
+                printf("P cannot be equal to 1. enter number of people to enter post office (size %d): ", arrSize);
+                fgets(PInput, arrSize, stdin);
+            }
             //input is valid, accept input
             else
             {
@@ -964,16 +1010,6 @@ void ThreadTest()
             char *buf = new char[threadNameMaxLen];
             snprintf(buf, threadNameMaxLen, "Free Space For Mailbox %d", i);
             freeSpacesSem[i] = new Semaphore(buf, S);
-        }
-
-        //initialize unreadMutexes, to protect the int which shows number of unread messages in a mailbox
-        unreadMutexes = new Semaphore *[P];
-        for (int i = 0; i < P; i++)
-        {
-            int threadNameMaxLen = strlen("Unread Integer Mutex 99999");
-            char *buf = new char[threadNameMaxLen];
-            snprintf(buf, threadNameMaxLen, "Unread Integer Mutex %d", i);
-            unreadMutexes[i] = new Semaphore(buf, 1);
         }
 
         //initialize unreadMessages, acts as a pointer to show where a mailbox can be read and written to
