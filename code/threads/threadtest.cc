@@ -47,6 +47,22 @@ Semaphore *MessageSemaphore = new Semaphore("Messages Until Simulation End Semap
 Semaphore **mailboxMutexes;
 Semaphore **freeSpacesSem;
 int *unreadMessages;
+//for task 4
+int R;
+int W;
+int N;
+int numRead = 0;
+Semaphore *area = new Semaphore("Shared Area Semaphore", 1);
+Semaphore *mutex = new Semaphore("General Mutual Exclusion Semaphore", 1);
+//we want threads to execute in a particular order
+Semaphore *readBlock = new Semaphore("Block Reading", 0);
+Semaphore *writeBlock = new Semaphore("Block writing", 0);
+Semaphore *readOverflow = new Semaphore("Block Extra Reads", 0);
+Semaphore *finishedReadSem = new Semaphore("Protects finishedRead", 1);
+Semaphore *finishedWriteSem = new Semaphore("Protects finishedWrite", 1);
+int enteredRead = 0;
+int finishedRead = 0;
+int finishedWrite = 0;
 //End proj2 changes by Lucas Blanchard
 
 //Begin proj1 code changes by Lucas Blanchard
@@ -462,6 +478,7 @@ void semPhilos(int which)
     printf("--------Philosopher %d is exiting\n", which);
 }
 
+//task 3 postOffice code
 char *getRandMsg()
 {
     int chooseShout = Random() % 11;
@@ -512,7 +529,6 @@ char *getRandMsg()
     }
 }
 
-//task 3 postOffice code
 void postOffice(int which)
 {
     while (true)
@@ -585,11 +601,51 @@ void postOffice(int which)
 
         //decrement total M. if we are at this point, we are definitely sending the constructed message.
         M--;
+        ///////////////////////////////////////
+        ///////////////////////////////////////
+        ///////////////////////////////////////
+        ///////////////////////////////////////
+        //printf("\n\nwhich: %d, M: %d\n\n", which, M);
+        ///////////////////////////////////////
+        ///////////////////////////////////////
+        //M = 6823, random int after MS->V();
+        //deadlock at freeSpacesSem
+        //4 comp to 0
+        //int
+        //3 comp to 0
+        //3 send to 0
+        //4 slept to wait for 0's slot
+        //
+        //
+        //4 waiting on 0
+        //545680, 0free->V();, 4 woken up;
+        //3 steals slot again
+
+        //4 slept @ 545770 for mailboxes[0] because 3 currently accessing it.
+        //0 tries to send message to 4 and is slept
+        //3 called V on resource that 4 needs, 4 isn't woken up?
+        //2 is slept on freeSpaces b/c 1's mailbox full
+        //1 reads
+        //3 hogs mailboxslot[1]
+        //2 is slept
+        //1 reads message
+        //2 is woken up and successfully sends message
+        //1 writes message for 0, who is slept so cannot read
+        //1 is slept
+        //2 fails to send message to person 4, slep for decrement M
+        //2 woken up then slept for free space to 4
+        //3 sends message to 2, who is slept
+        //tries to send message to 0 but is slept
+        //TICK ~545240
+        ///////////////////////////////////////
+        ///////////////////////////////////////
+        ///////////////////////////////////////
+        ///////////////////////////////////////
+
         MessageSemaphore->V();
 
         //signal that the reciever is losing a free slot
         freeSpacesSem[reciever]->P();
-
         //increase number of unread messages so the reciever knows where to read from first
         mailboxMutexes[reciever]->P();
         int recieverUnreadMessages = unreadMessages[reciever]++;
@@ -603,6 +659,70 @@ void postOffice(int which)
     }
 }
 
+//task 4 reader/writer code
+void readerThread(int which)
+{
+    readBlock->P();
+    enteredRead++;
+    //we reached N readers. If there are writers, yield
+    ////////////////////////////////////////////////
+    //what happens when there's no more readers, only writers?
+    //-rs 55 6,1,2,at some point, last thread may first to reach end of read section
+    //then we must have a way for end-of-reading to signal only if other threads finished
+    //-rs 55 5,5,2 what happens to all the writes?
+    //2,10,2 deadlock
+    ////////////////////////////////////////////////
+    ////////////////////////////////////////////////
+    ////////////////////////////////////////////////
+    ////////////////////////////////////////////////
+    ////////////////////////////////////////////////
+    ////////////////////////////////////////////////
+    ////////////////////////////////////////////////
+    ////////////////////////////////////////////////
+
+    if (enteredRead == (N + 1) && (W - finishedWrite) != 0)
+    {
+        writeBlock->V();
+        area->V();
+        readBlock->P();
+    }
+    readBlock->V();
+
+    mutex->P();
+    if (enteredRead == 1)
+        area->P();
+    mutex->V();
+
+    printf("\n%d startRead", which);
+    printf("\n%d doneRead", which);
+
+    mutex->P();
+    if ((W - finishedWrite) == 0)
+    {
+        readBlock->V();
+    }
+    finishedRead++;
+    if ((R - finishedRead) == 0)
+    {
+        for (int i = 0; i < (W - finishedWrite); i++)
+            writeBlock->V();
+    }
+    mutex->V();
+}
+
+void writerThread(int which)
+{
+    writeBlock->P();
+    area->P();
+
+    printf("\n%d startWrite", which);
+    printf("\n%d doneWrite", which);
+
+    enteredRead = 1;
+    finishedWrite++;
+    area->V();
+    readBlock->V();
+}
 //End proj2 code changes by Lucas Blanchard
 
 //ThreadTest() run by nachos
@@ -972,6 +1092,12 @@ void ThreadTest()
                 printf("that was not an integer. enter number of messages per mailbox (size %d): ", arrSize);
                 fgets(SInput, arrSize, stdin);
             }
+            //if P = 1, P0 cannot send message to a thread that isn't itself
+            else if (atoi(SInput) == 0)
+            {
+                printf("S cannot be equal to 0. enter number of people to enter post office (size %d): ", arrSize);
+                fgets(SInput, arrSize, stdin);
+            }
             //input is valid, accept input
             else
             {
@@ -1036,6 +1162,118 @@ void ThreadTest()
 
     else if (projTask == 6)
     {
+        //prompt and capture valid input
+        //arrSize input of 7 should be plenty (99999) to support 10k
+        int arrSize = 7;
+        char *RInput = new char[arrSize];
+        char *WInput = new char[arrSize];
+        char *NInput = new char[arrSize];
+
+        //R validation
+        bool validInput = false;
+        printf("enter max number of readers in general, whitespaces don't count and input bytesize must be %d or less: ", arrSize);
+        fgets(RInput, arrSize, stdin);
+
+        while (!validInput)
+        {
+            //input size > max size is invalid
+            if (inputOverflow(RInput))
+            {
+                printf("input overflow error. enter max number of readers in general (size %d): ", arrSize);
+                fgets(RInput, arrSize, stdin);
+            }
+            //only integers are valid
+            else if (!isInteger(RInput))
+            {
+                printf("that was not an integer. enter max number of readers in general (size %d): ", arrSize);
+                fgets(RInput, arrSize, stdin);
+            }
+            //input is valid, accept input
+            else
+            {
+                validInput = true;
+                R = atoi(RInput);
+            }
+        }
+
+        //W validation
+        validInput = false;
+        printf("enter max number of writers, whitespaces don't count and input bytesize must be %d or less: ", arrSize);
+        fgets(WInput, arrSize, stdin);
+
+        while (!validInput)
+        {
+            //input size > max size is invalid
+            if (inputOverflow(WInput))
+            {
+                printf("input overflow error. enter max number of writers (size %d): ", arrSize);
+                fgets(WInput, arrSize, stdin);
+            }
+            //only integers are valid
+            else if (!isInteger(WInput))
+            {
+                printf("that was not an integer. enter max number of writers (size %d): ", arrSize);
+                fgets(WInput, arrSize, stdin);
+            }
+            //input is valid, accept input
+            else
+            {
+                validInput = true;
+                W = atoi(WInput);
+            }
+        }
+
+        //N validation
+        validInput = false;
+        printf("enter max number of readers accessing file, whitespaces don't count and input bytesize must be %d or less: ", arrSize);
+        fgets(NInput, arrSize, stdin);
+
+        while (!validInput)
+        {
+            //input size > max size is invalid
+            if (inputOverflow(NInput))
+            {
+                printf("input overflow error. enter max number of readers accessing file (size %d): ", arrSize);
+                fgets(NInput, arrSize, stdin);
+            }
+            //only integers are valid
+            else if (!isInteger(NInput))
+            {
+                printf("that was not an integer. enter max number of readers accessing file (size %d): ", arrSize);
+                fgets(NInput, arrSize, stdin);
+            }
+            //input is valid, accept input
+            else
+            {
+                validInput = true;
+                N = atoi(NInput);
+            }
+        }
+
+        //validation complete
+        //forking threads
+        for (int i = 0; i < R; i++)
+        {
+            int threadNameMaxLen = strlen("Reader Thread 99999");
+            char *buf = new char[threadNameMaxLen];
+            snprintf(buf, threadNameMaxLen, "Reader Thread %d", i);
+
+            Thread *t = new Thread(buf);
+            t->Fork(readerThread, i);
+        }
+
+        for (int i = 0; i < W; i++)
+        {
+            int threadNameMaxLen = strlen("Writer Thread 99999");
+            char *buf = new char[threadNameMaxLen];
+            snprintf(buf, threadNameMaxLen, "Writer Thread %d", i);
+
+            Thread *t = new Thread(buf);
+            t->Fork(writerThread, i);
+        }
+
+        //allow readers to read
+        readBlock->V();
     }
 
     else if (projTask == 0)
