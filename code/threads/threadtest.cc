@@ -57,9 +57,6 @@ Semaphore *mutex = new Semaphore("General Mutual Exclusion Semaphore", 1);
 //we want threads to execute in a particular order
 Semaphore *readBlock = new Semaphore("Block Reading", 0);
 Semaphore *writeBlock = new Semaphore("Block writing", 0);
-Semaphore *readOverflow = new Semaphore("Block Extra Reads", 0);
-Semaphore *finishedReadSem = new Semaphore("Protects finishedRead", 1);
-Semaphore *finishedWriteSem = new Semaphore("Protects finishedWrite", 1);
 int enteredRead = 0;
 int finishedRead = 0;
 int finishedWrite = 0;
@@ -662,66 +659,77 @@ void postOffice(int which)
 //task 4 reader/writer code
 void readerThread(int which)
 {
+    //wait for main to signal
     readBlock->P();
-    enteredRead++;
-    //we reached N readers. If there are writers, yield
-    ////////////////////////////////////////////////
-    //what happens when there's no more readers, only writers?
-    //-rs 55 6,1,2,at some point, last thread may first to reach end of read section
-    //then we must have a way for end-of-reading to signal only if other threads finished
-    //-rs 55 5,5,2 what happens to all the writes?
-    //2,10,2 deadlock
-    ////////////////////////////////////////////////
-    ////////////////////////////////////////////////
-    ////////////////////////////////////////////////
-    ////////////////////////////////////////////////
-    ////////////////////////////////////////////////
-    ////////////////////////////////////////////////
-    ////////////////////////////////////////////////
-    ////////////////////////////////////////////////
+    //instantly increment number of entered readers
+    int localEnteredRead = ++enteredRead;
 
+    //if entered readers is one after the max number of readers per section
+    //AND if there are still writers
+    //block any other readers from entering
     if (enteredRead == (N + 1) && (W - finishedWrite) != 0)
     {
-        writeBlock->V();
-        area->V();
         readBlock->P();
     }
-    readBlock->V();
 
-    mutex->P();
+    //take area semaphore if first reader
     if (enteredRead == 1)
         area->P();
-    mutex->V();
+    readBlock->V();
 
-    printf("\n%d startRead", which);
-    printf("\n%d doneRead", which);
+    printf("\nREAD #%d BEGINS", which);
+    for (int i = 0; i < 5000000; i++)
+        ;
+    printf("\nREAD #%d FINISH", which);
 
     mutex->P();
+    //this thread is finished reading(protected)
+    finishedRead++;
+
+    //if no more writers, switch to readers
     if ((W - finishedWrite) == 0)
     {
         readBlock->V();
     }
-    finishedRead++;
-    if ((R - finishedRead) == 0)
+    //if entered readers is equal to max number of readers per section
+    //AND if there are still writers
+    //OR there are no more writers
+    //release area and allow writers to take control
+    else if ((localEnteredRead == (N) && (W - finishedWrite) != 0) || ((R - finishedRead) == 0))
     {
-        for (int i = 0; i < (W - finishedWrite); i++)
-            writeBlock->V();
+        area->V();
+        writeBlock->V();
     }
     mutex->V();
 }
 
 void writerThread(int which)
 {
+    //wait to be signaled by reader or by writer thread if no readers
     writeBlock->P();
     area->P();
 
-    printf("\n%d startWrite", which);
-    printf("\n%d doneWrite", which);
+    printf("\n-----WRITE #%d BEGINS", which);
+    for (int i = 0; i < 10000000; i++)
+        ;
+    printf("\n-----WRITE #%d FINISH", which);
 
-    enteredRead = 1;
+    //there is already a reader in the readerblock section
+    enteredRead = 0;
+    //writing is finished, increment
     finishedWrite++;
+
+    //if no more readers, sequentially unblock writers until death
+    if ((R - finishedRead) == 0)
+    {
+        writeBlock->V();
+    }
+    //release area no matter what
     area->V();
-    readBlock->V();
+
+    //if readers exist, allow them to run
+    if ((R - finishedRead) != 0)
+        readBlock->V();
 }
 //End proj2 code changes by Lucas Blanchard
 
@@ -1171,6 +1179,7 @@ void ThreadTest()
 
         //R validation
         bool validInput = false;
+        printf("note: simulated latency can be removed by deleting for loop between read/write printf\n\n");
         printf("enter max number of readers in general, whitespaces don't count and input bytesize must be %d or less: ", arrSize);
         fgets(RInput, arrSize, stdin);
 
@@ -1274,6 +1283,9 @@ void ThreadTest()
 
         //allow readers to read
         readBlock->V();
+        //allow writers if there are no readers
+        if (!R)
+            writeBlock->V();
     }
 
     else if (projTask == 0)
