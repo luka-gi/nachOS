@@ -57,6 +57,7 @@ Semaphore *mutex = new Semaphore("General Mutual Exclusion Semaphore", 1);
 //we want threads to execute in a particular order
 Semaphore *readBlock = new Semaphore("Block Reading", 0);
 Semaphore *writeBlock = new Semaphore("Block writing", 0);
+Semaphore *waitReadersBlocked = new Semaphore("Wait For Readers", 0);
 int enteredRead = 0;
 int finishedRead = 0;
 int finishedWrite = 0;
@@ -662,25 +663,30 @@ void readerThread(int which)
     //wait for main to signal
     readBlock->P();
     //instantly increment number of entered readers
-    int localEnteredRead = ++enteredRead;
+    enteredRead++;
 
     //if entered readers is one after the max number of readers per section
     //AND if there are still writers
     //block any other readers from entering
+
     if (enteredRead == (N + 1) && (W - finishedWrite) != 0)
     {
+        writeBlock->V();
+        waitReadersBlocked->V();
         readBlock->P();
     }
 
     //take area semaphore if first reader
     if (enteredRead == 1)
+    {
         area->P();
+    }
     readBlock->V();
 
-    printf("\nREAD #%d BEGINS", which);
-    for (int i = 0; i < 5000000; i++)
-        ;
-    printf("\nREAD #%d FINISH", which);
+    printf("\n--READ #%d BEGINS", which);
+    // for (int i = 0; i < 5000000; i++)
+    //     ;
+    printf("\n--READ #%d FINISH", which);
 
     mutex->P();
     //this thread is finished reading(protected)
@@ -695,11 +701,17 @@ void readerThread(int which)
     //AND if there are still writers
     //OR there are no more writers
     //release area and allow writers to take control
-    else if ((localEnteredRead == (N) && (W - finishedWrite) != 0) || ((R - finishedRead) == 0))
+    else if (((R - finishedRead) == 0))
     {
         area->V();
         writeBlock->V();
     }
+    else if ((finishedRead % N == 0 && (W - finishedWrite) != 0))
+    {
+        waitReadersBlocked->P();
+        area->V();
+    }
+
     mutex->V();
 }
 
@@ -710,11 +722,10 @@ void writerThread(int which)
     area->P();
 
     printf("\n-----WRITE #%d BEGINS", which);
-    for (int i = 0; i < 10000000; i++)
-        ;
+    // for (int i = 0; i < 10000000; i++)
+    //     ;
     printf("\n-----WRITE #%d FINISH", which);
 
-    //there is already a reader in the readerblock section
     enteredRead = 0;
     //writing is finished, increment
     finishedWrite++;
