@@ -599,46 +599,7 @@ void postOffice(int which)
 
         //decrement total M. if we are at this point, we are definitely sending the constructed message.
         M--;
-        ///////////////////////////////////////
-        ///////////////////////////////////////
-        ///////////////////////////////////////
-        ///////////////////////////////////////
-        //printf("\n\nwhich: %d, M: %d\n\n", which, M);
-        ///////////////////////////////////////
-        ///////////////////////////////////////
-        //M = 6823, random int after MS->V();
-        //deadlock at freeSpacesSem
-        //4 comp to 0
-        //int
-        //3 comp to 0
-        //3 send to 0
-        //4 slept to wait for 0's slot
-        //
-        //
-        //4 waiting on 0
-        //545680, 0free->V();, 4 woken up;
-        //3 steals slot again
-
-        //4 slept @ 545770 for mailboxes[0] because 3 currently accessing it.
-        //0 tries to send message to 4 and is slept
-        //3 called V on resource that 4 needs, 4 isn't woken up?
-        //2 is slept on freeSpaces b/c 1's mailbox full
-        //1 reads
-        //3 hogs mailboxslot[1]
-        //2 is slept
-        //1 reads message
-        //2 is woken up and successfully sends message
-        //1 writes message for 0, who is slept so cannot read
-        //1 is slept
-        //2 fails to send message to person 4, slep for decrement M
-        //2 woken up then slept for free space to 4
-        //3 sends message to 2, who is slept
-        //tries to send message to 0 but is slept
-        //TICK ~545240
-        ///////////////////////////////////////
-        ///////////////////////////////////////
-        ///////////////////////////////////////
-        ///////////////////////////////////////
+        printf("\n==================================Total messages remaining: %d", M);
 
         MessageSemaphore->V();
 
@@ -671,7 +632,7 @@ void readerThread(int which)
 
     if (enteredRead == (N + 1) && (W - finishedWrite) != 0)
     {
-        writeBlock->V();
+        area->V();
         waitReadersBlocked->V();
         readBlock->P();
     }
@@ -709,7 +670,7 @@ void readerThread(int which)
     else if ((finishedRead % N == 0 && (W - finishedWrite) != 0))
     {
         waitReadersBlocked->P();
-        area->V();
+        writeBlock->V();
     }
 
     mutex->V();
@@ -740,7 +701,9 @@ void writerThread(int which)
 
     //if readers exist, allow them to run
     if ((R - finishedRead) != 0)
+    {
         readBlock->V();
+    }
 }
 //End proj2 code changes by Lucas Blanchard
 
