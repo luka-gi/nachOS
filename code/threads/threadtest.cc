@@ -705,6 +705,57 @@ void writerThread(int which)
         readBlock->V();
     }
 }
+
+//bonus task
+
+class monitorDP
+{
+public:
+    //THINKING == 0
+    //HUNGRY == 1
+    //EATING == 2
+    int state[10];
+    Condition self[10000];
+
+    void init()
+    {
+        printf("INIT");
+        for (int i = 0; i < 10000; i++)
+        {
+            state[i] = 0;
+        }
+    }
+
+    void test(int i)
+    {
+        if ((state[(i + P - 1) % P] != 2) && (state[i] == 1) && (state[(i + 1) % P] != 2))
+        {
+            printf("Philosopher %d is eating", i);
+            state[i] = 2;
+            self[i].Signal(self[i].conditionLock);
+        }
+    }
+
+    void pickUp(int i)
+    {
+        printf("Philosopher %d is picking up chopsticks", i);
+        state[i] = 1;
+        test(i);
+        if (state[i] != 2)
+        {
+            self[i].Wait(self[i].conditionLock);
+        }
+    }
+
+    void putDown(int i)
+    {
+        printf("Philosopher %d is thinking", i);
+        state[i] = 0;
+        test((i + P - 1) % P);
+        test((i + 1) % P);
+    }
+};
+
 //End proj2 code changes by Lucas Blanchard
 
 //ThreadTest() run by nachos
@@ -1264,7 +1315,78 @@ void ThreadTest()
 
     else if (projTask == 0)
     {
+        //prompt and capture valid input
+        //arrSize input of 7 should be plenty (99999) to support 10k
+        int arrSize = 7;
+        char *MInput = new char[arrSize];
+        char *PInput = new char[arrSize];
+
+        bool validInput = false;
+
+        //M validation
+        printf("enter number of meals to be eaten, whitespaces don't count and input bytesize must be %d or less: ", arrSize);
+        fgets(MInput, arrSize, stdin);
+
+        while (!validInput)
+        {
+            //input size > max size is invalid
+            if (inputOverflow(MInput))
+            {
+                printf("input overflow error. enter number of meals to be eaten (size %d): ", arrSize);
+                fgets(MInput, arrSize, stdin);
+            }
+            //only integers are valid
+            else if (!isInteger(MInput))
+            {
+                printf("that was not an integer. enter number of meals to be eaten (size %d): ", arrSize);
+                fgets(MInput, arrSize, stdin);
+            }
+            //input is valid, accept input
+            else
+            {
+                validInput = true;
+                M = atoi(MInput);
+            }
+        }
+
+        //P validation
+        validInput = false;
+        printf("enter number of philosophers to dine, whitespaces don't count and input bytesize must be %d or less: ", arrSize);
+        fgets(PInput, arrSize, stdin);
+
+        while (!validInput)
+        {
+            //input size > max size is invalid
+            if (inputOverflow(PInput))
+            {
+                printf("input overflow error. enter number of philosophers to dine (size %d): ", arrSize);
+                fgets(PInput, arrSize, stdin);
+            }
+            //only integers are valid
+            else if (!isInteger(PInput))
+            {
+                printf("that was not an integer. enter number of philosophers to dine (size %d): ", arrSize);
+                fgets(PInput, arrSize, stdin);
+            }
+            //if P = 1, there is only one chopstick to eat a meal
+            else if (atoi(PInput) == 1)
+            {
+                printf("P cannot be equal to 1. enter number of philosophers to dine (size %d): ", arrSize);
+                fgets(PInput, arrSize, stdin);
+            }
+            //input is valid, accept input
+            else
+            {
+                validInput = true;
+                P = atoi(PInput);
+            }
+        }
+
+        //validation finished
+        monitorDP *MonitorDP;
+        MonitorDP->init();
     }
+
     //End proj2 code changes by Lucas Blanchard
 
     //yield and end main thread once forked, or once illegal projTask value is passed
