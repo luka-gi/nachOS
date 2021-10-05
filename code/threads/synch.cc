@@ -123,9 +123,9 @@ void Lock::Release()
 Condition::Condition(char *debugName)
 {
     name = debugName;
-    conditionSem = new Semaphore(name, __INT_MAX__);
+    conditionSem = new Semaphore(name, 1);
     conditionMut = new Semaphore(name, 1);
-    conditionHandshake = new Semaphore(name, __INT_MAX__);
+    conditionHandshake = new Semaphore(name, 1);
     conditionLock = new Lock(name);
     waiters = 0;
 }
@@ -138,8 +138,6 @@ Condition::~Condition()
 }
 void Condition::Wait(Lock *conditionLock)
 {
-    ASSERT(FALSE);
-
     conditionMut->P();
     waiters++;
     conditionMut->V();

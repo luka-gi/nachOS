@@ -61,6 +61,72 @@ Semaphore *waitReadersBlocked = new Semaphore("Wait For Readers", 0);
 int enteredRead = 0;
 int finishedRead = 0;
 int finishedWrite = 0;
+//bonus global
+
+class monitorDP
+{
+private:
+    enum
+    {
+        THINKING,
+        HUNGRY,
+        EATING
+    } state[10000];
+    Condition **self;
+
+    void test(int i)
+    {
+        if ((state[(i + P - 1) % P] != EATING) && (state[i] == HUNGRY) && (state[(i + 1) % P] != EATING))
+        {
+            printf("\n---Philosopher %d has picked up both chopsticks", i);
+            state[i] = EATING;
+            self[i]->Signal(self[i]->conditionLock);
+            printf("\n----Philosopher %d is eating", i);
+        }
+    }
+
+public:
+    monitorDP();
+
+    void pickUp(int i)
+    {
+        printf("\n-Philosopher %d is hungry", i);
+        state[i] = HUNGRY;
+        printf("\n--Philosopher %d is trying to pick up both chopsticks", i);
+        test(i);
+        if (state[i] != EATING)
+        {
+            self[i]->Wait(self[i]->conditionLock);
+        }
+    }
+
+    void putDown(int i)
+    {
+        state[i] = THINKING;
+        printf("\n------Philosopher %d is putting down left chopstick", i);
+        test((i + P - 1) % P);
+        printf("\n-------Philosopher %d is putting down right chopstick", i);
+        test((i + 1) % P);
+        printf("\n--------Philosopher %d is thinking", i);
+    }
+};
+
+monitorDP::monitorDP()
+{
+    self = new Condition *[10000];
+    for (int i = 0; i < 10000; i++)
+    {
+        self[i] = new Condition("ConditionVar");
+        state[i] = THINKING;
+    }
+}
+
+monitorDP *MDP = new monitorDP();
+
+Semaphore *startMonitor = new Semaphore("Wait For Monitor Termination", 0);
+Semaphore *endMonitor = new Semaphore("Wait For Monitor Termination", 0);
+Semaphore *numThreads = new Semaphore("Protect N", 1);
+//reuse N for numThreads
 //End proj2 changes by Lucas Blanchard
 
 //Begin proj1 code changes by Lucas Blanchard
@@ -619,61 +685,69 @@ void postOffice(int which)
 }
 
 //task 4 reader/writer code
+// void readerThread(int which)
+// {
+//     //wait for main to signal
+//     readBlock->P();
+//     //instantly increment number of entered readers
+//     enteredRead++;
+
+//     //if entered readers is one after the max number of readers per section
+//     //AND if there are still writers
+//     //block any other readers from entering
+
+//     if (enteredRead == (N + 1) && (W - finishedWrite) != 0)
+//     {
+//         area->V();
+//         waitReadersBlocked->V();
+//         readBlock->P();
+//     }
+
+//     //take area semaphore if first reader
+//     if (enteredRead == 1)
+//     {
+//         area->P();
+//     }
+//     readBlock->V();
+
+//     printf("\n--READ #%d BEGINS", which);
+//     // for (int i = 0; i < 5000000; i++)
+//     //     ;
+//     printf("\n--READ #%d FINISH", which);
+
+//     mutex->P();
+//     //this thread is finished reading(protected)
+//     finishedRead++;
+
+//     //if no more writers, switch to readers
+//     if ((W - finishedWrite) == 0)
+//     {
+//         readBlock->V();
+//     }
+//     //if entered readers is equal to max number of readers per section
+//     //AND if there are still writers
+//     //OR there are no more writers
+//     //release area and allow writers to take control
+//     else if (((R - finishedRead) == 0))
+//     {
+//         area->V();
+//         writeBlock->V();
+//     }
+//     else if ((finishedRead % N == 0 && (W - finishedWrite) != 0))
+//     {
+//         waitReadersBlocked->P();
+//         writeBlock->V();
+//     }
+
+//     mutex->V();
+// }
+
 void readerThread(int which)
 {
     //wait for main to signal
     readBlock->P();
     //instantly increment number of entered readers
     enteredRead++;
-
-    //if entered readers is one after the max number of readers per section
-    //AND if there are still writers
-    //block any other readers from entering
-
-    if (enteredRead == (N + 1) && (W - finishedWrite) != 0)
-    {
-        area->V();
-        waitReadersBlocked->V();
-        readBlock->P();
-    }
-
-    //take area semaphore if first reader
-    if (enteredRead == 1)
-    {
-        area->P();
-    }
-    readBlock->V();
-
-    printf("\n--READ #%d BEGINS", which);
-    // for (int i = 0; i < 5000000; i++)
-    //     ;
-    printf("\n--READ #%d FINISH", which);
-
-    mutex->P();
-    //this thread is finished reading(protected)
-    finishedRead++;
-
-    //if no more writers, switch to readers
-    if ((W - finishedWrite) == 0)
-    {
-        readBlock->V();
-    }
-    //if entered readers is equal to max number of readers per section
-    //AND if there are still writers
-    //OR there are no more writers
-    //release area and allow writers to take control
-    else if (((R - finishedRead) == 0))
-    {
-        area->V();
-        writeBlock->V();
-    }
-    else if ((finishedRead % N == 0 && (W - finishedWrite) != 0))
-    {
-        waitReadersBlocked->P();
-        writeBlock->V();
-    }
-
-    mutex->V();
 }
 
 void writerThread(int which)
@@ -707,55 +781,35 @@ void writerThread(int which)
 }
 
 //bonus task
-
-class monitorDP
+void monitorDPThread(int which)
 {
-public:
-    //THINKING == 0
-    //HUNGRY == 1
-    //EATING == 2
-    int state[10];
-    Condition self[10000];
-
-    void init()
+    while (true)
     {
-        printf("INIT");
-        for (int i = 0; i < 10000; i++)
+        startMonitor->P();
+        startMonitor->V();
+        mealSem->P();
+        if (!M)
         {
-            state[i] = 0;
+            mealSem->V();
+            break;
         }
-    }
+        M--;
+        int localM = M;
+        mealSem->V();
 
-    void test(int i)
-    {
-        if ((state[(i + P - 1) % P] != 2) && (state[i] == 1) && (state[(i + 1) % P] != 2))
-        {
-            printf("Philosopher %d is eating", i);
-            state[i] = 2;
-            self[i].Signal(self[i].conditionLock);
-        }
+        MDP->pickUp(which);
+        busyWait(3, 6);
+        printf("\n-----after %d ate, M is now %d", which, localM);
+        MDP->putDown(which);
+        busyWait(3, 6);
     }
-
-    void pickUp(int i)
-    {
-        printf("Philosopher %d is picking up chopsticks", i);
-        state[i] = 1;
-        test(i);
-        if (state[i] != 2)
-        {
-            self[i].Wait(self[i].conditionLock);
-        }
-    }
-
-    void putDown(int i)
-    {
-        printf("Philosopher %d is thinking", i);
-        state[i] = 0;
-        test((i + P - 1) % P);
-        test((i + 1) % P);
-    }
-};
-
+    numThreads->P();
+    N--;
+    numThreads->V();
+    endMonitor->P();
+    printf("\nPhilosopher %d is leaving", which);
+    endMonitor->V();
+}
 //End proj2 code changes by Lucas Blanchard
 
 //ThreadTest() run by nachos
@@ -1379,12 +1433,34 @@ void ThreadTest()
             {
                 validInput = true;
                 P = atoi(PInput);
+                N = P;
             }
         }
 
-        //validation finished
-        monitorDP *MonitorDP;
-        MonitorDP->init();
+        //input validation complete
+        for (int i = 0; i < P; i++)
+        {
+            int threadNameMaxLen = strlen("Philosopher Thread 1000000");
+            char *buf = new char[threadNameMaxLen];
+            snprintf(buf, threadNameMaxLen, "Philosopher Thread %d", i);
+
+            Thread *t = new Thread(buf);
+            t->Fork(monitorDPThread, i);
+            printf("\nPhilosopher %d is waiting to be seated", i);
+        }
+        startMonitor->V();
+        printf("\n\n==================All philosophers are seated========================\n");
+        while (true)
+        {
+            numThreads->P();
+            if (!N)
+            {
+                break;
+            }
+            numThreads->V();
+        }
+        printf("\n\n==================All philosophers are seated========================\n");
+        endMonitor->V();
     }
 
     //End proj2 code changes by Lucas Blanchard
