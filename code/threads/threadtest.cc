@@ -57,10 +57,15 @@ Semaphore *mutex = new Semaphore("General Mutual Exclusion Semaphore", 1);
 //we want threads to execute in a particular order
 Semaphore *readBlock = new Semaphore("Block Reading", 0);
 Semaphore *writeBlock = new Semaphore("Block writing", 0);
-Semaphore *waitReadersBlocked = new Semaphore("Wait For Readers", 0);
+Semaphore *waitReadersBlocked = new Semaphore("Wait For Last Reader", 0);
+bool entFirst = 1;
 int enteredRead = 0;
 int finishedRead = 0;
 int finishedWrite = 0;
+int enteredWaiters = 0;
+int firstIter = 1;
+int toPass;
+bool nextNotLast = 1;
 //bonus global
 
 class monitorDP
@@ -746,8 +751,76 @@ void readerThread(int which)
 {
     //wait for main to signal
     readBlock->P();
-    //instantly increment number of entered readers
+
+    mutex->P();
     enteredRead++;
+    if (enteredRead == (toPass + 1) && W - finishedWrite != 0)
+    {
+        if (firstIter)
+        {
+            waitReadersBlocked->V();
+        }
+        enteredWaiters++;
+        mutex->V();
+        readBlock->P();
+    }
+    else
+    {
+        mutex->V();
+    }
+    //instantly increment number of entered readers
+    //if we're at max readers, and there are writers, block next readers
+
+    //printf("\n%dWAITINGON4", which);
+    mutex->P();
+    if (entFirst)
+    {
+        entFirst = 0;
+        mutex->V();
+        area->P();
+    }
+    else
+    {
+        mutex->V();
+    }
+
+    printf("\n--READ #%d BEGINS", which);
+    // for (int i = 0; i < 10000000; i++)
+    //     ;
+    printf("\n--READ #%d FINISH", which);
+
+    //printf("\n%dWAITINGON6", which);
+    mutex->P();
+    finishedRead++;
+    if ((finishedRead % (N) == 0 && (W - finishedWrite) != 0))
+    {
+
+        if (firstIter && R - finishedRead != 0)
+        {
+            mutex->V();
+            readBlock->V();
+            waitReadersBlocked->P();
+            mutex->P();
+            firstIter = 0;
+            mutex->V();
+        }
+        else
+        {
+            mutex->V();
+        }
+        writeBlock->V();
+        area->V();
+    }
+    else if (R - finishedRead == 0)
+    {
+        mutex->V();
+        writeBlock->V();
+    }
+    else
+    {
+        mutex->V();
+        readBlock->V();
+    }
 }
 
 void writerThread(int which)
@@ -757,13 +830,25 @@ void writerThread(int which)
     area->P();
 
     printf("\n-----WRITE #%d BEGINS", which);
-    // for (int i = 0; i < 10000000; i++)
+    // for (int i = 0; i < 300000000; i++)
     //     ;
     printf("\n-----WRITE #%d FINISH", which);
 
-    enteredRead = 0;
     //writing is finished, increment
     finishedWrite++;
+
+    if (R - finishedRead != 0 && W - finishedWrite != 0)
+    {
+        mutex->P();
+        entFirst = 1;
+        enteredRead = 0;
+        toPass = N - enteredWaiters + 1;
+        for (int i = 0; i < enteredWaiters; i++)
+        {
+            readBlock->V();
+        }
+        mutex->V();
+    }
 
     //if no more readers, sequentially unblock writers until death
     if ((R - finishedRead) == 0)
@@ -774,9 +859,12 @@ void writerThread(int which)
     area->V();
 
     //if readers exist, allow them to run
-    if ((R - finishedRead) != 0)
+    if ((R - finishedRead) != 0 && (W - finishedWrite) == 0)
     {
-        readBlock->V();
+        for (int i = 0; i < R; i++)
+        {
+            readBlock->V();
+        }
     }
 }
 
@@ -1335,6 +1423,7 @@ void ThreadTest()
             {
                 validInput = true;
                 N = atoi(NInput);
+                toPass = N;
             }
         }
 
