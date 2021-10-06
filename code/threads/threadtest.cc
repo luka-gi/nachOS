@@ -33,8 +33,12 @@ bool NFAvail = 1;
 Semaphore *mealSem = new Semaphore("Meal Semaphore", 1);
 Semaphore *NFSem = new Semaphore("Unfinished Threadcount Semaphore", 1);
 Semaphore **chopSticksSem;
+int *chAvail;
+Semaphore **sleepers;
+int *sleepCount;
 Semaphore *allSatSem = new Semaphore("Thread Startblock Semaphore", 0);
 Semaphore *allLeaveSem = new Semaphore("Thread Deathblock Semaphore", 0);
+Semaphore *chopStickMutex = new Semaphore("Pick up Both or None", 1);
 //for task 3
 struct Message
 {
@@ -502,10 +506,52 @@ void semPhilos(int which)
     //loop to break out of once M = 0. avoids reading shared resource M.
     while (true)
     {
-        chopSticksSem[which]->P();
-        printf("\n-Philosopher %d has picked up left chopstick", which);
-        chopSticksSem[(which + 1) % P]->P();
-        printf("\n--Philosopher %d has picked up right chopstick", which);
+        while (true)
+        {
+            chopStickMutex->P();
+            if (!chAvail[which])
+            {
+                if (which != 0)
+                {
+                    chopStickMutex->V();
+                    mutex->P();
+                    sleepCount[which - 1]++;
+                    mutex->V();
+                    sleepers[which - 1]->P();
+                    continue;
+                }
+                else
+                {
+                    chopStickMutex->V();
+                    mutex->P();
+                    sleepCount[P - 1]++;
+                    mutex->V();
+                    sleepers[P - 1]->P();
+                    continue;
+                }
+            }
+            else if (!chAvail[(which + 1) % P])
+            {
+                chopStickMutex->V();
+                mutex->P();
+                sleepCount[(which + 1) % P]++;
+                mutex->V();
+                sleepers[(which + 1) % P]->P();
+                continue;
+            }
+            else
+            {
+                mutex->V();
+                chAvail[which] = 0;
+                chopSticksSem[which]->P();
+                printf("\n-Philosopher %d has picked up left chopstick", which);
+                chopSticksSem[(which + 1) % P]->P();
+                chAvail[(which + 1) % P] = 0;
+                printf("\n--Philosopher %d has picked up right chopstick", which);
+                chopStickMutex->V();
+                break;
+            }
+        }
 
         //hoard M for reading and writing
         mealSem->P();
@@ -527,12 +573,23 @@ void semPhilos(int which)
 
         //drop chopsticks
         chopSticksSem[which]->V();
+        chAvail[which] = 1;
         printf("\n----Philosopher %d has dropped left chopstick", which);
         chopSticksSem[(which + 1) % P]->V();
+        chAvail[(which + 1) % P] = 1;
         printf("\n-----Philosopher %d has dropped right chopstick", which);
 
         printf("\n------Philosopher %d has begun thinking", which);
         busyWait(3, 6);
+
+        mutex->P();
+        int localSleepCount = sleepCount[which];
+        for (int i = 0; i < localSleepCount; i++)
+        {
+            sleepCount[which]--;
+            sleepers[which]->V();
+        }
+        mutex->V();
     }
     //drop chopsticks (since the last iteration doesn't enter the first if condition)
     chopSticksSem[which]->V();
@@ -1136,8 +1193,16 @@ void ThreadTest()
         }
 
         //input validation complete
+        chAvail = new int[P];
+        sleepCount = new int[P];
+        sleepers = new Semaphore *[P];
         for (int i = 0; i < P; i++)
         {
+            chAvail[i] = 1;
+            sleepCount[i] = 0;
+
+            sleepers[i] = new Semaphore("Sleeper", 0);
+
             int threadNameMaxLen = strlen("Philosopher Thread 99999");
             char *buf = new char[threadNameMaxLen];
             snprintf(buf, threadNameMaxLen, "Philosopher Thread %d", i);
