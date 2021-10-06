@@ -64,12 +64,14 @@ private:
 // may release it.  As with semaphores, you can't read the lock value
 // (because the value might change immediately after you read it).
 
+//Begin proj2 code changes by Lucas Blanchard
 class Lock
 {
 public:
   Lock(char *debugName);           // initialize lock to be FREE
   ~Lock();                         // deallocate lock
   char *getName() { return name; } // debugging assist
+  //technically shouldn't read the value, but can protect with something else if necessary
   int getValue() { return value; }
 
   void Acquire(); // these are the only operations on a lock
@@ -82,10 +84,12 @@ public:
 
 private:
   char *name; // for debugging
+  //a private semaphore is what makes locks work
   Semaphore *lockSem;
   int value;
   // plus some other stuff you'll need to define
 };
+//End proj2 code changes by Lucas Blanchard
 
 // The following class defines a "condition variable".  A condition
 // variable does not have a value, but threads may be queued, waiting
@@ -119,6 +123,7 @@ private:
 // can acquire the lock, and change data structures, before the woken
 // thread gets a chance to run.
 
+//Begin proj2 code changes by Lucas Blanchard
 class Condition
 {
 public:
@@ -142,4 +147,6 @@ private:
   int waiters;
   // plus some other stuff you'll need to define
 };
+//End proj2 code changes by Lucas Blanchard
+
 #endif // SYNCH_H

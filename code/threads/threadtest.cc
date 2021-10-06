@@ -58,16 +58,18 @@ Semaphore *mutex = new Semaphore("General Mutual Exclusion Semaphore", 1);
 Semaphore *readBlock = new Semaphore("Block Reading", 0);
 Semaphore *writeBlock = new Semaphore("Block writing", 0);
 Semaphore *waitReadersBlocked = new Semaphore("Wait For Last Reader", 0);
-bool entFirst = 1;
-int enteredRead = 0;
-int finishedRead = 0;
-int finishedWrite = 0;
-int enteredWaiters = 0;
-int firstIter = 1;
-int toPass;
-bool nextNotLast = 1;
+bool entFirst = 1;      //first reader of N
+int enteredRead = 0;    //number of threads entered in current cycle
+int finishedRead = 0;   //number of finished readers
+int finishedWrite = 0;  //finished writers
+int enteredWaiters = 0; //number of threads trapped in reader if statement(see bellow)
+int firstIter = 1;      //first iteration of readers behaves differently from the rest
+int toPass;             //num of readers allowed to pass (explained more below)
+
 //bonus global
 
+//create DP monitor class
+//this is just from the monitor example sheet given in class
 class monitorDP
 {
 private:
@@ -93,7 +95,7 @@ private:
 public:
     monitorDP();
 
-    void pickUp(int i)
+    bool pickUp(int i)
     {
         printf("\n-Philosopher %d is hungry", i);
         state[i] = HUNGRY;
@@ -102,7 +104,9 @@ public:
         if (state[i] != EATING)
         {
             self[i]->Wait(self[i]->conditionLock);
+            return 0;
         }
+        return 1;
     }
 
     void putDown(int i)
@@ -116,6 +120,8 @@ public:
     }
 };
 
+//initialization constructor of DP monitor
+//just init() as from the sheet given in class
 monitorDP::monitorDP()
 {
     self = new Condition *[10000];
@@ -126,10 +132,13 @@ monitorDP::monitorDP()
     }
 }
 
+//create global monitor object
 monitorDP *MDP = new monitorDP();
 
+//control when philosophers end and start at the same time
 Semaphore *startMonitor = new Semaphore("Wait For Monitor Termination", 0);
 Semaphore *endMonitor = new Semaphore("Wait For Monitor Termination", 0);
+//protect N which in this case is used for philosophers to decide how many need to finish eating
 Semaphore *numThreads = new Semaphore("Protect N", 1);
 //reuse N for numThreads
 //End proj2 changes by Lucas Blanchard
@@ -689,92 +698,39 @@ void postOffice(int which)
     }
 }
 
-//task 4 reader/writer code
-// void readerThread(int which)
-// {
-//     //wait for main to signal
-//     readBlock->P();
-//     //instantly increment number of entered readers
-//     enteredRead++;
-
-//     //if entered readers is one after the max number of readers per section
-//     //AND if there are still writers
-//     //block any other readers from entering
-
-//     if (enteredRead == (N + 1) && (W - finishedWrite) != 0)
-//     {
-//         area->V();
-//         waitReadersBlocked->V();
-//         readBlock->P();
-//     }
-
-//     //take area semaphore if first reader
-//     if (enteredRead == 1)
-//     {
-//         area->P();
-//     }
-//     readBlock->V();
-
-//     printf("\n--READ #%d BEGINS", which);
-//     // for (int i = 0; i < 5000000; i++)
-//     //     ;
-//     printf("\n--READ #%d FINISH", which);
-
-//     mutex->P();
-//     //this thread is finished reading(protected)
-//     finishedRead++;
-
-//     //if no more writers, switch to readers
-//     if ((W - finishedWrite) == 0)
-//     {
-//         readBlock->V();
-//     }
-//     //if entered readers is equal to max number of readers per section
-//     //AND if there are still writers
-//     //OR there are no more writers
-//     //release area and allow writers to take control
-//     else if (((R - finishedRead) == 0))
-//     {
-//         area->V();
-//         writeBlock->V();
-//     }
-//     else if ((finishedRead % N == 0 && (W - finishedWrite) != 0))
-//     {
-//         waitReadersBlocked->P();
-//         writeBlock->V();
-//     }
-
-//     mutex->V();
-// }
-
 void readerThread(int which)
 {
     //wait for main to signal
     readBlock->P();
 
+    //Immediately increase num of threads which entered
     mutex->P();
     enteredRead++;
+    //allow toPass threads to pass, then sleep and trap the next one
     if (enteredRead == (toPass + 1) && W - finishedWrite != 0)
     {
+        //if this is the first time running this section
         if (firstIter)
         {
+            //signal that the last thread may start writer threads
             waitReadersBlocked->V();
         }
+        //increase number of threads waiting in THIS area
         enteredWaiters++;
         mutex->V();
+        //all threads are now blocked at start or here
         readBlock->P();
     }
     else
     {
         mutex->V();
     }
-    //instantly increment number of entered readers
-    //if we're at max readers, and there are writers, block next readers
 
-    //printf("\n%dWAITINGON4", which);
+    //if this is the first of N readers, take area Sem
     mutex->P();
     if (entFirst)
     {
+        //(this is no longer the first of N)
         entFirst = 0;
         mutex->V();
         area->P();
@@ -784,21 +740,26 @@ void readerThread(int which)
         mutex->V();
     }
 
+    //read section
     printf("\n--READ #%d BEGINS", which);
-    // for (int i = 0; i < 10000000; i++)
-    //     ;
+    for (int i = 0; i < 100000000; i++)
+        ;
     printf("\n--READ #%d FINISH", which);
 
-    //printf("\n%dWAITINGON6", which);
     mutex->P();
+
+    //signal that a thread has finished reading
     finishedRead++;
+    //this formula means that if there are writers, and if this is the last of N threads...
+    //THEN give up area to the writers
     if ((finishedRead % (N) == 0 && (W - finishedWrite) != 0))
     {
-
+        //if this is the first iteration and there are readers
         if (firstIter && R - finishedRead != 0)
         {
             mutex->V();
             readBlock->V();
+            //wait for the (n = 1)th reader to block all other threads before giving up the area
             waitReadersBlocked->P();
             mutex->P();
             firstIter = 0;
@@ -811,11 +772,14 @@ void readerThread(int which)
         writeBlock->V();
         area->V();
     }
+
+    //if no more readers, just signal writers
     else if (R - finishedRead == 0)
     {
         mutex->V();
         writeBlock->V();
     }
+    //otherwise just continue through the reader cycle
     else
     {
         mutex->V();
@@ -829,20 +793,28 @@ void writerThread(int which)
     writeBlock->P();
     area->P();
 
+    //we can read
     printf("\n-----WRITE #%d BEGINS", which);
-    // for (int i = 0; i < 300000000; i++)
-    //     ;
+    for (int i = 0; i < 500000000; i++)
+        ;
     printf("\n-----WRITE #%d FINISH", which);
 
     //writing is finished, increment
     finishedWrite++;
 
+    //if there are readers and writers left, we must swap to readers as per usual
     if (R - finishedRead != 0 && W - finishedWrite != 0)
     {
         mutex->P();
+        //the next reader will be the "first" reader
         entFirst = 1;
+        //reset num of readers in shared reader area to 0
         enteredRead = 0;
+        //N is readers/cycle
+        //enteredWaiters is waiters trapped in if statement from earlier
+        //N - enteredWaiters + 1 = number of threads allowed to pass after incrementing, excluding those already trapped
         toPass = N - enteredWaiters + 1;
+        //unblock all trapped threads
         for (int i = 0; i < enteredWaiters; i++)
         {
             readBlock->V();
@@ -858,7 +830,7 @@ void writerThread(int which)
     //release area no matter what
     area->V();
 
-    //if readers exist, allow them to run
+    //if readers exist and there are no more writers, unblock them all at once because it doesn't matter
     if ((R - finishedRead) != 0 && (W - finishedWrite) == 0)
     {
         for (int i = 0; i < R; i++)
@@ -871,23 +843,24 @@ void writerThread(int which)
 //bonus task
 void monitorDPThread(int which)
 {
+    //wait for main
+    startMonitor->P();
+    startMonitor->V();
+
     while (true)
     {
-        startMonitor->P();
-        startMonitor->V();
+
         mealSem->P();
         if (!M)
         {
             mealSem->V();
             break;
         }
-        M--;
-        int localM = M;
+        printf("\n-----after %d eats, M will be %d", which, --M);
         mealSem->V();
 
         MDP->pickUp(which);
         busyWait(3, 6);
-        printf("\n-----after %d ate, M is now %d", which, localM);
         MDP->putDown(which);
         busyWait(3, 6);
     }
@@ -1418,6 +1391,11 @@ void ThreadTest()
                 printf("that was not an integer. enter max number of readers accessing file (size %d): ", arrSize);
                 fgets(NInput, arrSize, stdin);
             }
+            else if (atoi(NInput) == 0)
+            {
+                printf("N cannot be 0. enter max number of readers accessing file (size %d): ", arrSize);
+                fgets(NInput, arrSize, stdin);
+            }
             //input is valid, accept input
             else
             {
@@ -1453,7 +1431,9 @@ void ThreadTest()
         readBlock->V();
         //allow writers if there are no readers
         if (!R)
+        {
             writeBlock->V();
+        }
     }
 
     else if (projTask == 0)
@@ -1537,8 +1517,10 @@ void ThreadTest()
             t->Fork(monitorDPThread, i);
             printf("\nPhilosopher %d is waiting to be seated", i);
         }
-        startMonitor->V();
+        //ALL THREADS MAY RUN ONCE ALL ARE FORKED
         printf("\n\n==================All philosophers are seated========================\n");
+        startMonitor->V();
+        //WAIT FOR ALL PHILOSOPHERS TO FINISH EATING
         while (true)
         {
             numThreads->P();
@@ -1548,6 +1530,7 @@ void ThreadTest()
             }
             numThreads->V();
         }
+        //AFTER NO MORE MEALS, PHILOS MAY DIE
         printf("\n\n==================All philosophers are seated========================\n");
         endMonitor->V();
     }

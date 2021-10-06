@@ -99,6 +99,8 @@ void Semaphore::V()
 // Dummy functions -- so we can compile our later assignments
 // Note -- without a correct implementation of Condition::Wait(),
 // the test case in the network assignment won't work!
+
+//Begin proj2 code changes by Lucas Blanchard
 Lock::Lock(char *debugName)
 {
     name = debugName;
@@ -111,11 +113,14 @@ Lock::~Lock()
 }
 void Lock::Acquire()
 {
+    //semaphore takes lock, value decreased to reflect this
+
     lockSem->P();
     value = 0;
 }
 void Lock::Release()
 {
+    //release lock
     value = 1;
     lockSem->V();
 }
@@ -123,10 +128,11 @@ void Lock::Release()
 Condition::Condition(char *debugName)
 {
     name = debugName;
-    conditionSem = new Semaphore(name, 1);
+    conditionSem = new Semaphore(name, 0);
     conditionMut = new Semaphore(name, 1);
     conditionHandshake = new Semaphore(name, 1);
     conditionLock = new Lock(name);
+    //keeps track of threads needing the resource
     waiters = 0;
 }
 Condition::~Condition()
@@ -138,17 +144,19 @@ Condition::~Condition()
 }
 void Condition::Wait(Lock *conditionLock)
 {
+    //A THREAD IS WAITING FOR ACCESS
     conditionMut->P();
     waiters++;
     conditionMut->V();
 
-    conditionLock->Release();
+    conditionLock->Acquire();
     conditionSem->P();
     conditionHandshake->V();
-    conditionLock->Acquire();
+    conditionLock->Release();
 }
 void Condition::Signal(Lock *conditionLock)
 {
+    //RELEASE ONE WAITER, IF ANY
     conditionMut->P();
     if (waiters > 0)
     {
@@ -160,6 +168,7 @@ void Condition::Signal(Lock *conditionLock)
 }
 void Condition::Broadcast(Lock *conditionLock)
 {
+    //SIGNAL ALL WAITERS
     conditionMut->P();
     for (int i = 0; i < waiters; i++)
     {
@@ -172,3 +181,4 @@ void Condition::Broadcast(Lock *conditionLock)
     }
     conditionMut->V();
 }
+//End proj2 code changes by Lucas Blanchard
