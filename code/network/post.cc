@@ -12,7 +12,7 @@
 // 	The implementation synchronizes incoming messages with threads
 //	waiting for those messages.
 //
-// Copyright (c) 1992-1993,2021 The Regents of the University of California.
+// Copyright (c) 1992-1993 The Regents of the University of California.
 // All rights reserved.  See copyright.h for copyright notice and limitation 
 // of liability and disclaimer of warranty provisions.
 

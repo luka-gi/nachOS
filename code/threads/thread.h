@@ -30,7 +30,7 @@
 //	We must first allocate a data structure for it: "t = new Thread".
 //	Only then can we do the fork: "t->fork(f, arg)".
 //
-// Copyright (c) 1992-1993,2021 The Regents of the University of California.
+// Copyright (c) 1992-1993 The Regents of the University of California.
 // All rights reserved.  See copyright.h for copyright notice and limitation 
 // of liability and disclaimer of warranty provisions.
 
@@ -43,6 +43,7 @@
 #ifdef USER_PROGRAM
 #include "machine.h"
 #include "addrspace.h"
+#include "list.h"
 #endif
 
 // CPU register state to be saved on context switch.  
@@ -101,7 +102,9 @@ class Thread {
     void setStatus(ThreadStatus st) { status = st; }
     char* getName() { return (name); }
     void Print() { printf("%s, ", name); }
-
+	
+	void setID(int ID);	// Set a new ID.
+	bool isJoined;	// Used to determine if we've already joined to a child process.
   private:
     // some of the private data for this class is listed above
     
@@ -114,19 +117,28 @@ class Thread {
     void StackAllocate(VoidFunctionPtr func, int arg);
     					// Allocate a stack for thread.
 					// Used internally by Fork()
-
+	
 #ifdef USER_PROGRAM
 // A thread running a user program actually has *two* sets of CPU registers -- 
 // one for its state while executing user code, one for its state 
 // while executing kernel code.
 
     int userRegisters[NumTotalRegs];	// user-level CPU register state
-
+	Thread * parent;	// The parent of this thread.  Used for Join.
+	
+	int ID;	// The unique ID of the thread.  Used for process management.
   public:
     void SaveUserState();		// save user-level register state
     void RestoreUserState();		// restore user-level register state
+	
+	void setParent(Thread * newParent);	// Set a new parent.
+	Thread * getParent();	// Return the parent.
+	int getID();	// Return the ID.
 
     AddrSpace *space;			// User code this thread is running.
+	bool killNewChild;	// Bool variable used in process initialization, saying if we should kill the child we just made.
+	
+	
 #endif
 };
 

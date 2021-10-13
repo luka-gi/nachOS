@@ -2,7 +2,7 @@
 //	Routines to manage a bitmap -- an array of bits each of which
 //	can be either on or off.  Represented as an array of integers.
 //
-// Copyright (c) 1992-1993,2021 The Regents of the University of California.
+// Copyright (c) 1992-1993 The Regents of the University of California.
 // All rights reserved.  See copyright.h for copyright notice and limitation 
 // of liability and disclaimer of warranty provisions.
 
@@ -132,7 +132,9 @@ BitMap::Print()
     printf("Bitmap set:\n"); 
     for (int i = 0; i < numBits; i++)
 	if (Test(i))
-	    printf("%d, ", i);
+	    printf("1");
+	else
+		printf("0");
     printf("\n"); 
 }
 

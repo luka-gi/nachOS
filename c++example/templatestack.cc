@@ -5,7 +5,7 @@
 //	if the caller tries to push more things onto the stack than we have
 //	room for.
 //
-// Copyright (c) 1992,1993,1995,2021 The Regents of the University of California.
+// Copyright (c) 1992,1993,1995 The Regents of the University of California.
 // All rights reserved.  See copyright.h for copyright notice and limitation 
 // of liability and disclaimer of warranty provisions.
 

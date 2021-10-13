@@ -14,7 +14,7 @@
 // 	Very simple implementation -- no priorities, straight FIFO.
 //	Might need to be improved in later assignments.
 //
-// Copyright (c) 1992-1993,2021 The Regents of the University of California.
+// Copyright (c) 1992-1993 The Regents of the University of California.
 // All rights reserved.  See copyright.h for copyright notice and limitation 
 // of liability and disclaimer of warranty provisions.
 
@@ -53,8 +53,7 @@ Scheduler::~Scheduler()
 void
 Scheduler::ReadyToRun (Thread *thread)
 {
-    DEBUG('t', "Putting thread %s on ready list.\n", thread->getName());
-
+    //DEBUG('t', "Putting thread %i on ready list.\n", thread->getID());
     thread->setStatus(READY);
     readyList->Append((void *)thread);
 }
@@ -71,6 +70,16 @@ Thread *
 Scheduler::FindNextToRun ()
 {
     return (Thread *)readyList->Remove();
+}
+
+void
+Scheduler::WakeUpFromJoin (Thread *thread)	// Wake up a thread, put it at the front of the ready list so it runs next.
+{
+    //DEBUG('t', "Putting thread %i at front of ready list.\n", thread->getID());
+	thread->isJoined = false;
+
+    thread->setStatus(READY);
+    readyList->Prepend((void *)thread);
 }
 
 //----------------------------------------------------------------------
@@ -105,8 +114,7 @@ Scheduler::Run (Thread *nextThread)
     currentThread = nextThread;		    // switch to the next thread
     currentThread->setStatus(RUNNING);      // nextThread is now running
     
-    DEBUG('t', "Switching from thread \"%s\" to thread \"%s\"\n",
-	  oldThread->getName(), nextThread->getName());
+    //DEBUG('t', "Switching from thread \"%i\" to thread \"%i\"\n", oldThread->getID(), nextThread->getID());
     
     // This is a machine-dependent assembly language routine defined 
     // in switch.s.  You may have to think
@@ -115,7 +123,7 @@ Scheduler::Run (Thread *nextThread)
 
     SWITCH(oldThread, nextThread);
     
-    DEBUG('t', "Now in thread \"%s\"\n", currentThread->getName());
+    //DEBUG('t', "Now in thread \"%i\"\n", currentThread->getID());
 
     // If the old thread gave up the processor because it was finishing,
     // we need to delete its carcass.  Note we cannot delete the thread

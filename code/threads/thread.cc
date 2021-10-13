@@ -10,7 +10,7 @@
 //		In other words, it will not run again, until explicitly 
 //		put back on the ready queue.
 //
-// Copyright (c) 1992-1993,2021 The Regents of the University of California.
+// Copyright (c) 1992-1993 The Regents of the University of California.
 // All rights reserved.  See copyright.h for copyright notice and limitation 
 // of liability and disclaimer of warranty provisions.
 
@@ -40,6 +40,10 @@ Thread::Thread(char* threadName)
     status = JUST_CREATED;
 #ifdef USER_PROGRAM
     space = NULL;
+	parent = NULL;
+	ID = 0;
+	killNewChild = false;
+	isJoined = false;
 #endif
 }
 
@@ -57,7 +61,7 @@ Thread::Thread(char* threadName)
 
 Thread::~Thread()
 {
-    DEBUG('t', "Deleting thread \"%s\"\n", name);
+    //DEBUG('t', "Deleting thread \"%i\"\n", ID);
 
     ASSERT(this != currentThread);
     if (stack != NULL)
@@ -87,8 +91,7 @@ Thread::~Thread()
 void 
 Thread::Fork(VoidFunctionPtr func, int arg)
 {
-    DEBUG('t', "Forking thread \"%s\" with func = 0x%x, arg = %d\n",
-	  name, (int) func, arg);
+    //DEBUG('t', "Forking thread \"%i\" with func = 0x%x, arg = %d\n", ID, (int) func, arg);
     
     StackAllocate(func, arg);
 
@@ -120,7 +123,7 @@ Thread::CheckOverflow()
 #ifdef HOST_SNAKE			// Stacks grow upward on the Snakes
 	ASSERT(stack[StackSize - 1] == STACK_FENCEPOST);
 #else
-	ASSERT((int) *stack == (int) STACK_FENCEPOST);
+	ASSERT(*stack == STACK_FENCEPOST);
 #endif
 }
 
@@ -146,9 +149,25 @@ Thread::Finish ()
     (void) interrupt->SetLevel(IntOff);		
     ASSERT(this == currentThread);
     
-    DEBUG('t', "Finishing thread \"%s\"\n", getName());
+    //DEBUG('t', "Finishing thread \"%i\"\n", getID());
     
     threadToBeDestroyed = currentThread;
+#ifdef USER_PROGRAM
+	if(parent != NULL)	// Wake up the joined parent, if it exists.
+	{
+		//printf("Waking up thread %i\n", currentThread->getParent()->getID());
+		scheduler->WakeUpFromJoin(parent);
+	}
+
+	Thread * tempThread = new Thread("bleh!");
+	tempThread->setID(-1);
+	for (int i = 0; i < activeThreads->getSize(); i++)
+	{
+		tempThread = (Thread*)activeThreads->Remove();
+		if(tempThread != currentThread)
+			activeThreads->Append(tempThread);
+	}
+#endif
     Sleep();					// invokes SWITCH
     // not reached
 }
@@ -178,11 +197,13 @@ Thread::Yield ()
     IntStatus oldLevel = interrupt->SetLevel(IntOff);
     
     ASSERT(this == currentThread);
+	//printf("CONTEXT SWITCH: Yielding Thread %i to ",getID());
     
-    DEBUG('t', "Yielding thread \"%s\"\n", getName());
+    //DEBUG('t', "Yielding thread \"%i\"\n", getID());
     
     nextThread = scheduler->FindNextToRun();
     if (nextThread != NULL) {
+	//printf("%i.\n",nextThread->getID());
 	scheduler->ReadyToRun(this);
 	scheduler->Run(nextThread);
     }
@@ -212,16 +233,16 @@ void
 Thread::Sleep ()
 {
     Thread *nextThread;
-    
+	
     ASSERT(this == currentThread);
     ASSERT(interrupt->getLevel() == IntOff);
     
-    DEBUG('t', "Sleeping thread \"%s\"\n", getName());
+    //DEBUG('t', "Sleeping thread \"%i\"\n", getID());
 
     status = BLOCKED;
     while ((nextThread = scheduler->FindNextToRun()) == NULL)
 	interrupt->Idle();	// no one to run, wait for an interrupt
-        
+
     scheduler->Run(nextThread); // returns when we've been signalled
 }
 
@@ -285,6 +306,7 @@ Thread::StackAllocate (VoidFunctionPtr func, int arg)
 
 #ifdef USER_PROGRAM
 #include "machine.h"
+#include "list.h"
 
 //----------------------------------------------------------------------
 // Thread::SaveUserState
@@ -317,4 +339,10 @@ Thread::RestoreUserState()
     for (int i = 0; i < NumTotalRegs; i++)
 	machine->WriteRegister(i, userRegisters[i]);
 }
+
+void Thread::setID(int newID) {ID = newID;}	// Set a new ID.
+int Thread::getID() {return ID;}	// Return the ID.
+Thread* Thread::getParent() {return parent;}	// Return the parent.
+void Thread::setParent(Thread * newParent) {parent = newParent;}	// Set a new parent.
+
 #endif

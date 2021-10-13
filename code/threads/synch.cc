@@ -1,6 +1,6 @@
-// synch.cc
+// synch.cc 
 //	Routines for synchronizing threads.  Three kinds of
-//	synchronization routines are defined here: semaphores, locks
+//	synchronization routines are defined here: semaphores, locks 
 //   	and condition variables (the implementation of the last two
 //	are left to the reader).
 //
@@ -17,8 +17,8 @@
 // re-set the interrupt state back to its original value (whether
 // that be disabled or enabled).
 //
-// Copyright (c) 1992-1993,2021 The Regents of the University of California.
-// All rights reserved.  See copyright.h for copyright notice and limitation
+// Copyright (c) 1992-1993 The Regents of the University of California.
+// All rights reserved.  See copyright.h for copyright notice and limitation 
 // of liability and disclaimer of warranty provisions.
 
 #include "copyright.h"
@@ -33,7 +33,7 @@
 //	"initialValue" is the initial value of the semaphore.
 //----------------------------------------------------------------------
 
-Semaphore::Semaphore(char *debugName, int initialValue)
+Semaphore::Semaphore(char* debugName, int initialValue)
 {
     name = debugName;
     value = initialValue;
@@ -61,19 +61,19 @@ Semaphore::~Semaphore()
 //	when it is called.
 //----------------------------------------------------------------------
 
-void Semaphore::P()
+void
+Semaphore::P()
 {
-    IntStatus oldLevel = interrupt->SetLevel(IntOff); // disable interrupts
-
-    while (value == 0)
-    {                                         // semaphore not available
-        queue->Append((void *)currentThread); // so go to sleep
-        currentThread->Sleep();
-    }
-    value--; // semaphore available,
-             // consume its value
-
-    (void)interrupt->SetLevel(oldLevel); // re-enable interrupts
+    IntStatus oldLevel = interrupt->SetLevel(IntOff);	// disable interrupts
+    
+    while (value == 0) { 			// semaphore not available
+	queue->Append((void *)currentThread);	// so go to sleep
+	currentThread->Sleep();
+    } 
+    value--; 					// semaphore available, 
+						// consume its value
+    
+    (void) interrupt->SetLevel(oldLevel);	// re-enable interrupts
 }
 
 //----------------------------------------------------------------------
@@ -84,101 +84,29 @@ void Semaphore::P()
 //	are disabled when it is called.
 //----------------------------------------------------------------------
 
-void Semaphore::V()
+void
+Semaphore::V()
 {
     Thread *thread;
     IntStatus oldLevel = interrupt->SetLevel(IntOff);
 
     thread = (Thread *)queue->Remove();
-    if (thread != NULL) // make thread ready, consuming the V immediately
-        scheduler->ReadyToRun(thread);
+    if (thread != NULL)	   // make thread ready, consuming the V immediately
+	scheduler->ReadyToRun(thread);
     value++;
-    (void)interrupt->SetLevel(oldLevel);
+    (void) interrupt->SetLevel(oldLevel);
 }
 
-// Dummy functions -- so we can compile our later assignments
-// Note -- without a correct implementation of Condition::Wait(),
+// Dummy functions -- so we can compile our later assignments 
+// Note -- without a correct implementation of Condition::Wait(), 
 // the test case in the network assignment won't work!
+Lock::Lock(char* debugName) {}
+Lock::~Lock() {}
+void Lock::Acquire() {}
+void Lock::Release() {}
 
-//Begin proj2 code changes by Lucas Blanchard
-Lock::Lock(char *debugName)
-{
-    name = debugName;
-    lockSem = new Semaphore(name, 1);
-    value = 1;
-}
-Lock::~Lock()
-{
-    delete lockSem;
-}
-void Lock::Acquire()
-{
-    //semaphore takes lock, value decreased to reflect this
-
-    lockSem->P();
-    value = 0;
-}
-void Lock::Release()
-{
-    //release lock
-    value = 1;
-    lockSem->V();
-}
-
-Condition::Condition(char *debugName)
-{
-    name = debugName;
-    conditionSem = new Semaphore(name, 0);
-    conditionMut = new Semaphore(name, 1);
-    conditionHandshake = new Semaphore(name, 1);
-    conditionLock = new Lock(name);
-    //keeps track of threads needing the resource
-    waiters = 0;
-}
-Condition::~Condition()
-{
-    delete conditionLock;
-    delete conditionMut;
-    delete conditionSem;
-    delete conditionHandshake;
-}
-void Condition::Wait(Lock *conditionLock)
-{
-    //A THREAD IS WAITING FOR ACCESS
-    conditionMut->P();
-    waiters++;
-    conditionMut->V();
-
-    conditionLock->Acquire();
-    conditionSem->P();
-    conditionHandshake->V();
-    conditionLock->Release();
-}
-void Condition::Signal(Lock *conditionLock)
-{
-    //RELEASE ONE WAITER, IF ANY
-    conditionMut->P();
-    if (waiters > 0)
-    {
-        waiters--;
-        conditionSem->V();
-        conditionHandshake->P();
-    }
-    conditionMut->V();
-}
-void Condition::Broadcast(Lock *conditionLock)
-{
-    //SIGNAL ALL WAITERS
-    conditionMut->P();
-    for (int i = 0; i < waiters; i++)
-    {
-        conditionSem->V();
-    }
-    while (waiters > 0)
-    {
-        waiters--;
-        conditionHandshake->P();
-    }
-    conditionMut->V();
-}
-//End proj2 code changes by Lucas Blanchard
+Condition::Condition(char* debugName) { }
+Condition::~Condition() { }
+void Condition::Wait(Lock* conditionLock) { ASSERT(FALSE); }
+void Condition::Signal(Lock* conditionLock) { }
+void Condition::Broadcast(Lock* conditionLock) { }

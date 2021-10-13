@@ -4,7 +4,7 @@
 //
 //	Also, routines for testing the Console hardware device.
 //
-// Copyright (c) 1992-1993,2021 The Regents of the University of California.
+// Copyright (c) 1992-1993 The Regents of the University of California.
 // All rights reserved.  See copyright.h for copyright notice and limitation 
 // of liability and disclaimer of warranty provisions.
 
@@ -24,12 +24,14 @@ void
 StartProcess(char *filename)
 {
     OpenFile *executable = fileSystem->Open(filename);
+	
     AddrSpace *space;
 
     if (executable == NULL) {
 	printf("Unable to open file %s\n", filename);
 	return;
     }
+	
     space = new AddrSpace(executable);    
     currentThread->space = space;
 
