@@ -2,7 +2,7 @@
 #define COPYRIGHT_H
 
 /*
-Copyright (c) 1992,1993,1995,2021 The Regents of the University of California.
+Copyright (c) 1992,1993,1995 The Regents of the University of California.
 All rights reserved.
 
 Permission to use, copy, modify, and distribute this software and its
@@ -22,6 +22,6 @@ ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION TO
 PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 */
 
-static char *copyright = "Copyright (c) 1992,1993,1995,2021 The Regents of the University of California.  All rights reserved.";
+static char *copyright = "Copyright (c) 1992,1993,1995 The Regents of the University of California.  All rights reserved.";
 
 #endif  /* COPYRIGHT_H */

@@ -2,7 +2,7 @@
 //	Data structures for the thread dispatcher and scheduler.
 //	Primarily, the list of threads that are ready to run.
 //
-// Copyright (c) 1992-1993,2021 The Regents of the University of California.
+// Copyright (c) 1992-1993 The Regents of the University of California.
 // All rights reserved.  See copyright.h for copyright notice and limitation 
 // of liability and disclaimer of warranty provisions.
 
@@ -27,6 +27,7 @@ class Scheduler {
 					// list, if any, and return thread.
     void Run(Thread* nextThread);	// Cause nextThread to start running
     void Print();			// Print contents of ready list
+	void WakeUpFromJoin(Thread *thread);	// Wake up a thread and put it at the front of the list.
     
   private:
     List *readyList;  		// queue of threads that are ready to run,

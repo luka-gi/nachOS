@@ -39,7 +39,7 @@
 //	    (if Nachos exits in the middle of an operation that modifies
 //	    the file system, it may corrupt the disk)
 //
-// Copyright (c) 1992-1993,2021 The Regents of the University of California.
+// Copyright (c) 1992-1993 The Regents of the University of California.
 // All rights reserved.  See copyright.h for copyright notice and limitation 
 // of liability and disclaimer of warranty provisions.
 

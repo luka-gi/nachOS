@@ -11,7 +11,7 @@
 //		(if you haven't implemented the file system yet, you
 //		don't need to do this last step)
 //
-// Copyright (c) 1992-1993,2021 The Regents of the University of California.
+// Copyright (c) 1992-1993 The Regents of the University of California.
 // All rights reserved.  See copyright.h for copyright notice and limitation 
 // of liability and disclaimer of warranty provisions.
 
@@ -29,7 +29,7 @@
 //	object file header, in case the file was generated on a little
 //	endian machine, and we're now running on a big endian machine.
 //----------------------------------------------------------------------
-
+// taslk
 static void 
 SwapHeader (NoffHeader *noffH)
 {

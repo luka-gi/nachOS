@@ -15,7 +15,7 @@
  *	.data	-- initialized data
  *	.bss/.sbss -- uninitialized data (should be zero'd on program startup)
  *
- * Copyright (c) 1992-1993,2021 The Regents of the University of California.
+ * Copyright (c) 1992-1993 The Regents of the University of California.
  * All rights reserved.  See copyright.h for copyright notice and limitation 
  * of liability and disclaimer of warranty provisions.
  */
@@ -33,9 +33,6 @@
 
 #include "coff.h"
 #include "noff.h"
-
-#include <string.h> /* memset */
-#include <unistd.h> /* close */
 
 /* Routines for converting words and short words to and from the
  * simulated machine's format of little endian.  These end up
@@ -93,7 +90,6 @@ void Write(int fd, char *buf, int nBytes)
     }
 }
 
-void
 main (int argc, char **argv)
 {
     int fdIn, fdOut, numsections, i, inNoffFile;
@@ -167,9 +163,9 @@ main (int argc, char **argv)
     lseek(fdOut, inNoffFile, 0);
     printf("Loading %d sections:\n", numsections);
     for (i = 0; i < numsections; i++) {
-	printf("\t\"%s\", filepos 0x%p, mempos 0x%p, size 0x%p\n",
-	      sections[i].s_name, (void *)sections[i].s_scnptr,
-	      (void *)sections[i].s_paddr, (void *)sections[i].s_size);
+	printf("\t\"%s\", filepos 0x%x, mempos 0x%x, size 0x%x\n",
+	      sections[i].s_name, sections[i].s_scnptr,
+	      sections[i].s_paddr, sections[i].s_size);
 	if (sections[i].s_size == 0) {
 		/* do nothing! */	
 	} else if (!strcmp(sections[i].s_name, ".text")) {
