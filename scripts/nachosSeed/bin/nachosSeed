@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [ "$1" -eq "" ]
+then
+ runTimes=10;
+else
+ runTimes=$1;
+ shift;
+ args=$*;
+fi
+
+echo "Running nachos $runTimes times.\n\n";
+
+while [ $runTimes -gt 0 ]
+do
+  myRand=$RANDOM;
+  echo "nachos -rs $myRand $args";
+  runTimes=`expr $runTimes - 1`;
+  nachos -rs $myRand $args;
+done
