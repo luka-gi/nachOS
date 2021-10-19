@@ -30,6 +30,8 @@
 //	endian machine, and we're now running on a big endian machine.
 //----------------------------------------------------------------------
 // taslk
+
+
 static void 
 SwapHeader (NoffHeader *noffH)
 {
@@ -70,14 +72,14 @@ AddrSpace::AddrSpace(OpenFile *executable)
 		(WordToHost(noffH.noffMagic) == NOFFMAGIC))
     	SwapHeader(&noffH);
     ASSERT(noffH.noffMagic == NOFFMAGIC);
-
+    
 // how big is address space?
     size = noffH.code.size + noffH.initData.size + noffH.uninitData.size 
 			+ UserStackSize;	// we need to increase the size
 						// to leave room for the stack
     numPages = divRoundUp(size, PageSize);
     size = numPages * PageSize;
-
+    
 
 	//Michael Rivera change this to something more elegent
  
@@ -92,8 +94,8 @@ AddrSpace::AddrSpace(OpenFile *executable)
     pageTable = new TranslationEntry[numPages];
     for (i = 0; i < numPages; i++) {
 	pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-	pageTable[i].physicalPage = i;
-	pageTable[i].valid = TRUE;
+	//pageTable[i].physicalPage = i;
+	pageTable[i].valid = FALSE;
 	pageTable[i].use = FALSE;
 	pageTable[i].dirty = FALSE;
 	pageTable[i].readOnly = FALSE;  // if the code segment was entirely on 

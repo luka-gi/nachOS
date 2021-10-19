@@ -7,7 +7,7 @@
 
 #include "copyright.h"
 #include "system.h"
-
+#include "machine.h"
 // This defines *all* of the global data structures used by Nachos.
 // These are all initialized and de-allocated by this file.
 
@@ -19,6 +19,8 @@ Statistics *stats;			// performance metrics
 Timer *timer;				// the hardware timer device,
 					// for invoking context switches
 int threadChoice;
+
+BitMap *bitMap; //declare the bitmap for all threads to use 
 #ifdef FILESYS_NEEDED
 FileSystem  *fileSystem;
 #endif
