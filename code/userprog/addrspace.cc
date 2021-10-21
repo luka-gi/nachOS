@@ -19,6 +19,7 @@
 #include "system.h"
 #include "addrspace.h"
 #include "noff.h"
+#include "bitmap.h"
 #ifdef HOST_SPARC
 #include <strings.h>
 #endif
@@ -31,7 +32,10 @@
 //----------------------------------------------------------------------
 // taslk
 
-
+//begin code changes by Michael Rivera
+BitMap *memoryMap = new BitMap(32);
+int currentBit = 0;
+//end code changes by Michael Rivera
 static void 
 SwapHeader (NoffHeader *noffH)
 {
@@ -61,7 +65,7 @@ SwapHeader (NoffHeader *noffH)
 //
 //	"executable" is the file containing the object code to load into memory
 //----------------------------------------------------------------------
-
+//begin code changes by Michael Rivera
 AddrSpace::AddrSpace(OpenFile *executable)
 {
     NoffHeader noffH;
@@ -83,18 +87,34 @@ AddrSpace::AddrSpace(OpenFile *executable)
 
 	//Michael Rivera change this to something more elegent
  
-    ASSERT(numPages <= NumPhysPages);		// check we're not trying
+    if(numPages > NumPhysPages){
+        printf("Error not enough virtual memory to run");
+        //do something maybe different idk, make it only terminate one process somehow
+        Exit(-1);
+    }
+    //ASSERT(numPages <= NumPhysPages);		// check we're not trying
 						// to run anything too big --
 						// at least until we have
 						// virtual memory
 
-    DEBUG('a', "Initializing address space, num pages %d, size %d\n", 
-					numPages, size);
+    DEBUG('a', "Initializing address space, num pages %d, size %d\n",  numPages, size);
+
+
 // first, set up the translation 
     pageTable = new TranslationEntry[numPages];
+    int findFreeBit = memoryMap->Find();
+
+    
+    while(findFreeBit == -1){
+       //do something until any frames are free
+        findFreeBit = memoryMap->Find();
+    }
+    
+    if(findFreeBit != -1){
     for (i = 0; i < numPages; i++) {
+    memoryMap->Mark(findFreeBit);
 	pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-	//pageTable[i].physicalPage = i;
+	pageTable[i].physicalPage = findFreeBit;
 	pageTable[i].valid = FALSE;
 	pageTable[i].use = FALSE;
 	pageTable[i].dirty = FALSE;
@@ -102,7 +122,14 @@ AddrSpace::AddrSpace(OpenFile *executable)
 					// a separate page, we could set its 
 					// pages to be read-only
     }
-    
+
+    //show current memory map bits that are taken up
+    memoryMap->Print();
+    }
+   
+
+
+    //CHANGE THE ZERO FUNCTION TO ONLY 0 OUT THE PAGES THAT ARE TO BE USED PER PROCESS(HANDLED IN PAGE FAULT EXCEPTIONS)
 // zero out the entire address space, to zero the unitialized data segment 
 // and the stack segment
     bzero(machine->mainMemory, size);
@@ -123,6 +150,12 @@ AddrSpace::AddrSpace(OpenFile *executable)
 
 }
 
+//tests the bits that the process has taken and clears them, pass a parameter of the each bit that a certain process has taken
+void AddrSpace::clearBitsForAProcess(int bitToClear){
+    if(memoryMap->Test(bitToClear) == TRUE){
+    memoryMap->Clear(bitToClear);
+    }
+}
 //----------------------------------------------------------------------
 // AddrSpace::~AddrSpace
 // 	Dealloate an address space.  Nothing for now!
@@ -130,6 +163,7 @@ AddrSpace::AddrSpace(OpenFile *executable)
 
 AddrSpace::~AddrSpace()
 {
+     
    delete pageTable;
 }
 

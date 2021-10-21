@@ -20,7 +20,7 @@ Timer *timer;				// the hardware timer device,
 					// for invoking context switches
 int threadChoice;
 
-BitMap *bitMap; //declare the bitmap for all threads to use 
+
 #ifdef FILESYS_NEEDED
 FileSystem  *fileSystem;
 #endif

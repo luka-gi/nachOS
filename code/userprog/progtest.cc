@@ -20,6 +20,7 @@
 //	memory, and jump to it.
 //----------------------------------------------------------------------
 
+//change start process so that nachos can start a new process
 void
 StartProcess(char *filename)
 {
