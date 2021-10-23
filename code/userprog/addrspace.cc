@@ -118,7 +118,6 @@ AddrSpace::AddrSpace(OpenFile *executable)
                                            // a separate page, we could set its
                                            // pages to be read-only
         }
-        printf("\n%d\n", numPages);
         memoryMap->Print();
         //show current memory map bits that are taken up
         //}
@@ -157,8 +156,11 @@ AddrSpace::~AddrSpace()
 //Begin code changes by Lucas Blanchard
 void AddrSpace::loadPage(int vPageNum, unsigned int virtualAddr)
 {
+    int size = noffH.code.size + noffH.initData.size + noffH.uninitData.size + UserStackSize; // we need to increase the size
+                                                                                              // to leave room for the stack
+    numPages = divRoundUp(size, PageSize);
+    //printf("\nthis program has %d pages\n", numPages);
     //then, copy in the code and data segments into memory
-    printf("\n%d\n%d\n%d\n", noffH.code.virtualAddr, noffH.code.size, noffH.code.inFileAddr);
     int physPageNum = memoryMap->Find();
     //Then, find the first available free page (no need for special memory allocation)
     //and update the currentThread’s pageTable[].physicalPage
@@ -166,10 +168,14 @@ void AddrSpace::loadPage(int vPageNum, unsigned int virtualAddr)
     {
         pageTable[vPageNum].physicalPage = physPageNum;
         pageTable[vPageNum].valid = TRUE;
-        printf("aaa\n%d\n%d\n%d\naaa\n", physPageNum * PageSize, PageSize, noffH.code.inFileAddr + vPageNum * PageSize);
 
+        //printf("\nppn: %d\nvpn: %d\n", physPageNum, vPageNum);
+        if (noffH.code.size > 0)
+        {
+            this->executable->ReadAt(&(machine->mainMemory[physPageNum * PageSize]), PageSize, noffH.code.inFileAddr + vPageNum * PageSize);
+        }
+        memoryMap->Print();
         //machine->PrintMemory();
-        this->executable->ReadAt(&(machine->mainMemory[physPageNum * PageSize]), PageSize, noffH.code.inFileAddr + vPageNum * PageSize);
     }
     else
     {
