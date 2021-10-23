@@ -93,17 +93,19 @@ main(int argc, char **argv)
             printf (copyright);
 #ifdef USER_PROGRAM
         if (!strcmp(*argv, "-x")) {        	// run a user program
-	    ASSERT(argc > 1);
+	    if (argc > 1)
+	    {
             StartProcess(*(argv + 1));
-		printf("I'm here");
             argCount = 2;
+	    }
+	    else{printf("\nincorrect -x arguments\n");}
         } else if (!strcmp(*argv, "-c")) {      // test the console
 	    if (argc == 1)
 	        ConsoleTest(NULL, NULL);
 	    else {
-		ASSERT(argc > 2);
+		if(argc > 2){
 	        ConsoleTest(*(argv + 1), *(argv + 2));
-	        argCount = 3;
+	        argCount = 3;}else{printf("\nincorrect -c arguments\n");}
 	    }
 	    interrupt->Halt();		// once we start the console, then 
 					// Nachos will loop forever waiting 
