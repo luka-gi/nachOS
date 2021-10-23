@@ -345,7 +345,6 @@ void ExceptionHandler(ExceptionType which)
 		vPageNum = virtualAddr / PageSize;
 
 		currentThread->space->loadPage(vPageNum, virtualAddr);
-		memoryMap->Print();
 
 		break;
 	//End code changes by Lucas Blanchard
