@@ -126,10 +126,7 @@ int main(int argc, char **argv)
 						{
 							outputUserProg = TRUE;
 						}
-					}
-					//argument V comes after E
-					if (argc > 5)
-					{
+						//argument V comes after E
 						if (!strcmp(*(argv + 3), "-V"))
 						{
 							//argv + 4 is V args
@@ -166,6 +163,7 @@ int main(int argc, char **argv)
 				}
 			}
 			//End code changes by Lucas Blanchard
+
 			interrupt->Halt(); // once we start the console, then
 							   // Nachos will loop forever waiting
 							   // for console input

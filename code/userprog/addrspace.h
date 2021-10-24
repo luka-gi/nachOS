@@ -30,7 +30,9 @@ public:
                                    // stored in the file "executable"
   ~AddrSpace();                    // De-allocate an address space
 
+  //Begin code changes by Lucas Blanchard
   void loadPage(int vPageNum, unsigned int virtualAddr);
+  //End code changes by Lucas Blanchard
 
   void InitRegisters(); // Initialize user-level CPU registers,
                         // before jumping to user code
@@ -41,10 +43,11 @@ public:
   void clearBitsForAProcess(int bitToClear);
 
 private:
+  //Begin code changes by Lucas Blanchard
   NoffHeader noffH;
 
   OpenFile *executable;
-
+  //End code changes by Lucas Blanchard
   TranslationEntry *pageTable; // Assume linear page table translation
                                // for now!
   unsigned int numPages;       // Number of pages in the virtual

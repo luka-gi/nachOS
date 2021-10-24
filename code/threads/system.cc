@@ -27,7 +27,9 @@ FileSystem *fileSystem;
 Machine *machine; // user program memory and registers
 List *activeThreads;
 int threadID;
+//Begin code changes by Lucas Blanchard
 bool outputUserProg;
+//End code changes by Lucas Blanchard
 #endif
 
 #ifdef FILESYS

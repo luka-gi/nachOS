@@ -142,35 +142,67 @@ void AddrSpace::clearBitsForAProcess(int bitToClear)
 
 AddrSpace::~AddrSpace()
 {
+    //Begin code changes by Lucas Blanchard
+    //clear pages used by exiting process
+    if (outputUserProg)
+    {
+        printf("Pre deallocation");
+        memoryMap->Print();
+    }
+    for (int i = 0; i < numPages; i++)
+    {
+        if (pageTable[i].valid)
+        {
+            memoryMap->Clear(pageTable[i].physicalPage);
+        }
+    }
     delete pageTable;
     delete executable;
+    if (outputUserProg)
+    {
+        printf("Post deallocation");
+        memoryMap->Print();
+    }
+    //End code changes by Lucas Blanchard
 }
 
 //Begin code changes by Lucas Blanchard
 void AddrSpace::loadPage(int vPageNum, unsigned int virtualAddr)
 {
     //then, copy in the code and data segments into memory
+
+    if (outputUserProg)
+    {
+        printf("\nPage fault: Process %d is requesting virtual page %d\n", currentThread->getID(), vPageNum);
+    }
+
     int physPageNum = memoryMap->Find();
     int offset = virtualAddr % PageSize;
     //Then, find the first available free page (no need for special memory allocation)
     //and update the currentThread’s pageTable[].physicalPage
     if (physPageNum != -1)
     {
+        if (outputUserProg)
+        {
+            printf("\nAssigning physical page %d\n", physPageNum);
+        }
+
         pageTable[vPageNum].physicalPage = physPageNum;
         pageTable[vPageNum].valid = TRUE;
-        //zero out the page before loading
-        bzero(machine->mainMemory + physPageNum * PageSize, PageSize);
+
         //print statement for debugging
         //printf("\nppn: %d\nvpn: %d\npageSize: %d\nvaddr: %d\nnoffset: %d\ninstroff: %d\n", physPageNum, vPageNum, PageSize, virtualAddr, noffH.code.inFileAddr, offset);
         this->executable->ReadAt(&(machine->mainMemory[physPageNum * PageSize]), PageSize, noffH.code.inFileAddr + vPageNum * PageSize);
-
-        if (outputUserProg)
-        {
-            memoryMap->Print();
-        }
     }
     else
     {
+        if (outputUserProg)
+        {
+            //Swap out physical page Y from process <ONUM>.
+            //Virtual page Z removed.
+        }
+
+        //replace a page!!
         printf("\nCurrently there are not enough free frames\n");
     }
 }
