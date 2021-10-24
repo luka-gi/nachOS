@@ -68,7 +68,6 @@ SwapHeader(NoffHeader *noffH)
 //begin code changes by Michael Rivera
 AddrSpace::AddrSpace(OpenFile *executable)
 {
-
     unsigned int i, size;
 
     executable->ReadAt((char *)&noffH, sizeof(noffH), 0);
@@ -98,19 +97,11 @@ AddrSpace::AddrSpace(OpenFile *executable)
               numPages, size);
         // first, set up the translation
         pageTable = new TranslationEntry[numPages];
-        // int findFreeBit = memoryMap->Find();
-        // while (findFreeBit == -1)
-        // {
-        //     //do something until any frames are free
-        //     findFreeBit = memoryMap->Find();
-        // }
 
-        // if (findFreeBit != -1)
-        // {
         for (i = 0; i < numPages; i++)
         {
             pageTable[i].virtualPage = i; // for now, virtual page # = phys page #
-            pageTable[i].physicalPage = i;
+            pageTable[i].physicalPage = -1;
             pageTable[i].valid = FALSE;
             pageTable[i].use = FALSE;
             pageTable[i].dirty = FALSE;
@@ -126,7 +117,9 @@ AddrSpace::AddrSpace(OpenFile *executable)
 
         // zero out the entire address space, to zero the unitialized data segment
         // and the stack segment
-        bzero(machine->mainMemory, size);
+
+        //PRINT FOR DEBUGGING
+        //printf("numVPages: %d\n", numPages);
     }
     else
     {
@@ -156,30 +149,29 @@ AddrSpace::~AddrSpace()
 //Begin code changes by Lucas Blanchard
 void AddrSpace::loadPage(int vPageNum, unsigned int virtualAddr)
 {
-    int size = noffH.code.size + noffH.initData.size + noffH.uninitData.size + UserStackSize; // we need to increase the size
-                                                                                              // to leave room for the stack
-    numPages = divRoundUp(size, PageSize);
-    //printf("\nthis program has %d pages\n", numPages);
     //then, copy in the code and data segments into memory
     int physPageNum = memoryMap->Find();
+    int offset = virtualAddr % PageSize;
     //Then, find the first available free page (no need for special memory allocation)
     //and update the currentThread’s pageTable[].physicalPage
     if (physPageNum != -1)
     {
         pageTable[vPageNum].physicalPage = physPageNum;
         pageTable[vPageNum].valid = TRUE;
+        //zero out the page before loading
+        bzero(machine->mainMemory + physPageNum * PageSize, PageSize);
+        //print statement for debugging
+        //printf("\nppn: %d\nvpn: %d\npageSize: %d\nvaddr: %d\nnoffset: %d\ninstroff: %d\n", physPageNum, vPageNum, PageSize, virtualAddr, noffH.code.inFileAddr, offset);
+        this->executable->ReadAt(&(machine->mainMemory[physPageNum * PageSize]), PageSize, noffH.code.inFileAddr + vPageNum * PageSize);
 
-        //printf("\nppn: %d\nvpn: %d\n", physPageNum, vPageNum);
-        if (noffH.code.size > 0)
+        if (outputUserProg)
         {
-            this->executable->ReadAt(&(machine->mainMemory[physPageNum * PageSize]), PageSize, noffH.code.inFileAddr + vPageNum * PageSize);
+            memoryMap->Print();
         }
-        memoryMap->Print();
-        //machine->PrintMemory();
     }
     else
     {
-        printf("Currently there are not enough free frames");
+        printf("\nCurrently there are not enough free frames\n");
     }
 }
 //End code changes by Lucas Blanchard
