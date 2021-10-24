@@ -18,6 +18,5 @@ int main()
 			Write("\n10th loop!\n\n", 20, ConsoleOutput);
 		}
 	}
-	Write("\nAdding Complete!\n", 20, ConsoleOutput);
-	Exit(0);
+	Write("\nAdding Complete1!1\n", 20, ConsoleOutput);
 }
