@@ -20,8 +20,6 @@
 
 #define UserStackSize 1024 // increase this as necessary!
 
-extern BitMap *memoryMap;
-
 class AddrSpace
 {
 public:
@@ -45,7 +43,6 @@ public:
 private:
   //Begin code changes by Lucas Blanchard
   NoffHeader noffH;
-
   OpenFile *executable;
   //End code changes by Lucas Blanchard
   TranslationEntry *pageTable; // Assume linear page table translation
