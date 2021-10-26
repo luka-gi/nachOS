@@ -32,8 +32,8 @@
 // taslk
 
 //begin code changes by Michael Rivera
-BitMap *memoryMap = new BitMap(NumPhysPages);
-int currentBit = 0;
+static BitMap *memoryMap = new BitMap(NumPhysPages);
+//int currentBit = 0;
 //end code changes by Michael Rivera
 static void
 SwapHeader(NoffHeader *noffH)
@@ -185,6 +185,7 @@ void AddrSpace::loadPage(int vPageNum, unsigned int virtualAddr)
         if (outputUserProg)
         {
             printf("\nAssigning physical page %d\n", physPageNum);
+            memoryMap->Print();
         }
 
         pageTable[vPageNum].physicalPage = physPageNum;
@@ -204,6 +205,8 @@ void AddrSpace::loadPage(int vPageNum, unsigned int virtualAddr)
 
         //replace a page!!
         printf("\nCurrently there are not enough free frames\n");
+        //EXIT FOR NOW!!!
+        Exit(-1);
     }
 }
 //End code changes by Lucas Blanchard
