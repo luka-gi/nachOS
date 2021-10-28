@@ -104,36 +104,33 @@ int main(int argc, char **argv)
 				//if there is more arguments
 				if (argc > 2)
 				{
+					//Begin code changes by Alexander Mayer
 					//first argument is E
 					if (!strcmp(*(argv + 2), "-E"))
 					{
 						outputUserProg = TRUE;
 					}
 					//first argument is V
-					if (argc > 3)
+					else if (!strcmp(*(argv + 2), "-V"))
 					{
-						if (!strcmp(*(argv + 2), "-V"))
-						{
-							//argv + 3 is V args
-							//V LOGIC HERE
-							printf("\nV\n");
-						}
+						//argv + 3 is V args
+						//V LOGIC HERE
+						printf("\nV\n");
 					}
 					//argument E comes after V
-					if (argc > 4)
+					if (argc > 3)
 					{
-						if (!strcmp(*(argv + 4), "-E"))
-						{
-							outputUserProg = TRUE;
-						}
 						//argument V comes after E
-						if (!strcmp(*(argv + 3), "-V"))
+						if (!strcmp(*(argv + 2), "-V"))
 						{
-							//argv + 4 is V args
-							//V LOGIC HERE
-							printf("\nV\n");
+							if (!strcmp(*(argv + 3), "-E"))
+							{
+								outputUserProg = TRUE;
+							}
+
 						}
 					}
+					//End code changes by Alexander Mayer
 				}
 
 				printf("\nNumber of physical pages: %d\nPage size: %d\n\n", NumPhysPages, PageSize);
