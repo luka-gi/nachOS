@@ -39,6 +39,7 @@ extern List *activeThreads; // active thread list for process management
 extern int threadID;		// unique process id
 //Begin code changes by Lucas Blanchard
 extern bool outputUserProg;
+extern int replacementType;
 //End code changes by Lucas Blanchard
 #endif
 

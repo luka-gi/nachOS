@@ -96,6 +96,7 @@ int main(int argc, char **argv)
 #ifdef USER_PROGRAM
 		//Begin code changes by Lucas Blanchard
 		outputUserProg = FALSE;
+		replacementType = 0;
 		if (!strcmp(*argv, "-x"))
 		{ // run a user program
 			//if there is a file
@@ -104,36 +105,62 @@ int main(int argc, char **argv)
 				//if there is more arguments
 				if (argc > 2)
 				{
-					//Begin code changes by Alexander Mayer
 					//first argument is E
 					if (!strcmp(*(argv + 2), "-E"))
 					{
 						outputUserProg = TRUE;
 					}
 					//first argument is V
-					else if (!strcmp(*(argv + 2), "-V"))
-					{
-						//argv + 3 is V args
-						//V LOGIC HERE
-						printf("\nV\n");
-					}
-					//argument E comes after V
 					if (argc > 3)
 					{
-						//argument V comes after E
 						if (!strcmp(*(argv + 2), "-V"))
 						{
-							if (!strcmp(*(argv + 3), "-E"))
+							if (!strcmp(*(argv + 3), "1"))
 							{
-								outputUserProg = TRUE;
+								replacementType = 1;
 							}
-
+							else if (!strcmp(*(argv + 3), "2"))
+							{
+								replacementType = 2;
+							}
 						}
 					}
-					//End code changes by Alexander Mayer
+					//argument E comes after V
+					if (argc > 4)
+					{
+						if (!strcmp(*(argv + 4), "-E"))
+						{
+							outputUserProg = TRUE;
+						}
+						//argument V comes after E
+						if (!strcmp(*(argv + 3), "-V"))
+						{
+							if (!strcmp(*(argv + 4), "1"))
+							{
+								replacementType = 1;
+							}
+							else if (!strcmp(*(argv + 4), "2"))
+							{
+								replacementType = 2;
+							}
+						}
+					}
 				}
 
-				printf("\nNumber of physical pages: %d\nPage size: %d\n\n", NumPhysPages, PageSize);
+				printf("\nNumber of physical pages: %d\nPage size: %d", NumPhysPages, PageSize);
+
+				if (replacementType == 1)
+				{
+					printf("\nPage replacement type: FIFO\n\n");
+				}
+				else if (replacementType == 2)
+				{
+					printf("\nPage replacement type: Random\n\n");
+				}
+				else
+				{
+					printf("\nPage replacement type: None\n\n");
+				}
 
 				StartProcess(*(argv + 1));
 				argCount++;
@@ -203,8 +230,8 @@ int main(int argc, char **argv)
 		{
 			ASSERT(argc > 1);
 			Delay(2); // delay for 2 seconds
-					  // to give the user time to
-					  // start up another nachos
+				// to give the user time to
+				// start up another nachos
 			MailTest(atoi(*(argv + 1)));
 			argCount = 2;
 		}
