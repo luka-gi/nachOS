@@ -32,8 +32,8 @@
 // taslk
 
 //begin code changes by Michael Rivera
-BitMap *memoryMap = new BitMap(NumPhysPages);
-int currentBit = 0;
+static BitMap *memoryMap = new BitMap(NumPhysPages);
+//int currentBit = 0;
 //end code changes by Michael Rivera
 static void
 SwapHeader(NoffHeader *noffH)
@@ -66,7 +66,7 @@ SwapHeader(NoffHeader *noffH)
 //----------------------------------------------------------------------
 //begin code changes by Michael Rivera
 //begin code changes by Michael Rivera
-AddrSpace::AddrSpace(OpenFile *executable)
+AddrSpace::AddrSpace(OpenFile *executable, int PID)
 {
     unsigned int i, size;
 
@@ -81,6 +81,23 @@ AddrSpace::AddrSpace(OpenFile *executable)
         size = noffH.code.size + noffH.initData.size + noffH.uninitData.size + UserStackSize; // we need to increase the size
                                                                                               // to leave room for the stack
         numPages = divRoundUp(size, PageSize);
+
+        //Begin group code changes
+        int threadNameMaxLen = strlen("100000000000000.swap");
+        swapName = new char[threadNameMaxLen];
+        snprintf(swapName, threadNameMaxLen, "%d.swap", PID);
+
+        fileSystem->Create(swapName, size);
+        swap = fileSystem->Open(swapName);
+
+        int bufSize = noffH.code.size + noffH.initData.size + noffH.uninitData.size;
+        char *tempSwapCodeBuf = new char[bufSize];
+        executable->ReadAt(tempSwapCodeBuf, bufSize, sizeof(noffH));
+        swap->WriteAt(tempSwapCodeBuf, bufSize, 0);
+
+        delete tempSwapCodeBuf;
+        //End group code changes
+
         size = numPages * PageSize;
         // check we're not trying
         // to run anything too big --
@@ -158,6 +175,10 @@ AddrSpace::~AddrSpace()
     }
     delete pageTable;
     delete executable;
+    //actually delete the actual file
+    fileSystem->Remove(swapName);
+    delete swap;
+    delete swapName;
     if (outputUserProg)
     {
         printf("Post deallocation");
@@ -185,6 +206,7 @@ void AddrSpace::loadPage(int vPageNum, unsigned int virtualAddr)
         if (outputUserProg)
         {
             printf("\nAssigning physical page %d\n", physPageNum);
+            memoryMap->Print();
         }
 
         pageTable[vPageNum].physicalPage = physPageNum;
@@ -204,6 +226,9 @@ void AddrSpace::loadPage(int vPageNum, unsigned int virtualAddr)
 
         //replace a page!!
         printf("\nCurrently there are not enough free frames\n");
+        //EXIT FOR NOW!!!
+        //remove
+        Exit(-1);
     }
 }
 //End code changes by Lucas Blanchard

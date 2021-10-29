@@ -35,7 +35,7 @@ CPP = gcc -E
 INCDIR =-I../userprog -I../threads
 CFLAGS = -G 0 -c $(INCDIR)
 
-all: halt shell matmult sort adder infloop multiprog
+all: halt shell matmult sort adder infloop multiprog largememory
 
 start.o: start.s ../userprog/syscall.h
 	$(CPP) $(CPPFLAGS) start.c > strt.s
@@ -83,3 +83,9 @@ multiprog.o: multiprog.c
 multiprog: multiprog.o start.o
 	$(LD) $(LDFLAGS) start.o multiprog.o -o multiprog.coff
 	../bin/coff2noff multiprog.coff multiprog
+
+largememory.o: largememory.c
+	$(CC) $(CFLAGS) -c largememory.c
+largememory: largememory.o start.o
+	$(LD) $(LDFLAGS) start.o largememory.o -o largememory.coff
+	../bin/coff2noff largememory.coff largememory

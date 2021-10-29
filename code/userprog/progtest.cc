@@ -32,7 +32,7 @@ void StartProcess(char *filename)
         return;
     }
 
-    space = new AddrSpace(executable);
+    space = new AddrSpace(executable, 0);
     currentThread->space = space;
 
     space->InitRegisters(); // set the initial register values
