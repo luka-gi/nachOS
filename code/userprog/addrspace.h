@@ -23,10 +23,10 @@
 class AddrSpace
 {
 public:
-  AddrSpace(OpenFile *executable); // Create an address space,
-                                   // initializing it with the program
-                                   // stored in the file "executable"
-  ~AddrSpace();                    // De-allocate an address space
+  AddrSpace(OpenFile *executable, int PID); // Create an address space,
+                                            // initializing it with the program
+                                            // stored in the file "executable"
+  ~AddrSpace();                             // De-allocate an address space
 
   //Begin code changes by Lucas Blanchard
   void loadPage(int vPageNum, unsigned int virtualAddr);
@@ -44,6 +44,8 @@ private:
   //Begin code changes by Lucas Blanchard
   NoffHeader noffH;
   OpenFile *executable;
+  OpenFile *swap;
+  char *swapName;
   //End code changes by Lucas Blanchard
   TranslationEntry *pageTable; // Assume linear page table translation
                                // for now!

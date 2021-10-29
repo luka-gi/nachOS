@@ -16,4 +16,7 @@ int main()
 	Join(Exec("../test/adder"));
 	Join(Exec("../test/adder"));
 	Write("\nExec Adder 4\n", 20, ConsoleOutput);
+	Exec("../test/adder");
+	Write("\nHALTING!!!\n", 20, ConsoleOutput);
+	Exec("../test/halt");
 }
