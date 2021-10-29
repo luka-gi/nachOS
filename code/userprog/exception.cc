@@ -205,6 +205,8 @@ void ExceptionHandler(ExceptionType which)
 			}
 			delete filename;
 
+			AddrSpace *space;
+
 			// Do we have enough space?
 			if (!currentThread->killNewChild) // If so...
 			{
@@ -213,9 +215,9 @@ void ExceptionHandler(ExceptionType which)
 				// Calculate needed memory space
 				//Begin group code changes
 				execThread->setID(threadID);
-				AddrSpace *space;
+
 				space = new AddrSpace(executable, threadID);
-				//REMOVED DELETE EXECUTABLE
+				delete executable;
 				//End group code changes
 
 				execThread->space = space; // Set the address space to the new space.
@@ -229,6 +231,7 @@ void ExceptionHandler(ExceptionType which)
 			}
 			else // If not...
 			{
+				delete executable;
 				machine->WriteRegister(2, -1 * (threadID + 1)); // Return an error code
 				currentThread->killNewChild = false;			// Reset our variable
 			}
@@ -270,7 +273,7 @@ void ExceptionHandler(ExceptionType which)
 			if (arg1 == 0) // Did we exit properly?  If not, show an error message.
 				printf("Process %i exited normally!\n", currentThread->getID());
 			else
-				printf("ERROR: Process %i exited abnormally!\n", currentThread->getID());
+				printf("ERROR: Process %i exited abnormally with code %d!\n", currentThread->getID(), arg1);
 
 			if (currentThread->space) // Delete the used memory from the process.
 				delete currentThread->space;
