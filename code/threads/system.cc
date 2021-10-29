@@ -29,6 +29,7 @@ List *activeThreads;
 int threadID;
 //Begin code changes by Lucas Blanchard
 bool outputUserProg;
+int replacementType;
 //End code changes by Lucas Blanchard
 #endif
 
