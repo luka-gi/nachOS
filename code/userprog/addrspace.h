@@ -43,7 +43,6 @@ public:
 private:
   //Begin code changes by Lucas Blanchard
   NoffHeader noffH;
-  OpenFile *executable;
   OpenFile *swap;
   char *swapName;
   //End code changes by Lucas Blanchard

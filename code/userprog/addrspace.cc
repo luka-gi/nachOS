@@ -76,7 +76,7 @@ AddrSpace::AddrSpace(OpenFile *executable, int PID)
         SwapHeader(&noffH);
     if (noffH.noffMagic == NOFFMAGIC)
     {
-        this->executable = executable;
+
         // how big is address space?
         size = noffH.code.size + noffH.initData.size + noffH.uninitData.size + UserStackSize; // we need to increase the size
                                                                                               // to leave room for the stack
@@ -126,7 +126,9 @@ AddrSpace::AddrSpace(OpenFile *executable, int PID)
                                            // a separate page, we could set its
                                            // pages to be read-only
         }
+
         memoryMap->Print();
+
         //show current memory map bits that are taken up
         //}
 
@@ -144,14 +146,14 @@ AddrSpace::AddrSpace(OpenFile *executable, int PID)
     }
 }
 
-//tests the bits that the process has taken and clears them, pass a parameter of the each bit that a certain process has taken
-void AddrSpace::clearBitsForAProcess(int bitToClear)
-{
-    if (memoryMap->Test(bitToClear) == TRUE)
-    {
-        memoryMap->Clear(bitToClear);
-    }
-}
+// //tests the bits that the process has taken and clears them, pass a parameter of the each bit that a certain process has taken
+// void AddrSpace::clearBitsForAProcess(int bitToClear)
+// {
+//     if (memoryMap->Test(bitToClear) == TRUE)
+//     {
+//         memoryMap->Clear(bitToClear);
+//     }
+// }
 //----------------------------------------------------------------------
 // AddrSpace::~AddrSpace
 // 	Dealloate an address space.  Nothing for now!
@@ -163,7 +165,7 @@ AddrSpace::~AddrSpace()
     //clear pages used by exiting process
     if (outputUserProg)
     {
-        printf("Pre deallocation");
+        printf("\nPre deallocation");
         memoryMap->Print();
     }
     for (int i = 0; i < numPages; i++)
@@ -174,7 +176,6 @@ AddrSpace::~AddrSpace()
         }
     }
     delete pageTable;
-    delete executable;
     //actually delete the actual file
     fileSystem->Remove(swapName);
     delete swap;
@@ -214,7 +215,8 @@ void AddrSpace::loadPage(int vPageNum, unsigned int virtualAddr)
 
         //print statement for debugging
         //printf("\nppn: %d\nvpn: %d\npageSize: %d\nvaddr: %d\nnoffset: %d\ninstroff: %d\n", physPageNum, vPageNum, PageSize, virtualAddr, noffH.code.inFileAddr, offset);
-        this->executable->ReadAt(&(machine->mainMemory[physPageNum * PageSize]), PageSize, noffH.code.inFileAddr + vPageNum * PageSize);
+        this->swap->ReadAt(&(machine->mainMemory[physPageNum * PageSize]), PageSize, vPageNum * PageSize);
+        //machine->PrintMemory();
     }
     else
     {
@@ -223,12 +225,30 @@ void AddrSpace::loadPage(int vPageNum, unsigned int virtualAddr)
             //Swap out physical page Y from process <ONUM>.
             //Virtual page Z removed.
         }
-
-        //replace a page!!
-        printf("\nCurrently there are not enough free frames\n");
-        //EXIT FOR NOW!!!
-        //remove
-        Exit(-1);
+        if (replacementType == 1)
+        {
+            //
+        }
+        else if (replacementType == 2)
+        {
+            //
+        }
+        else
+        {
+            printf("\nCurrently there are not enough free frames. Terminating process %d\n", currentThread->getID());
+            for (int i = 0; i < numPages; i++)
+            {
+                if (pageTable[i].valid)
+                {
+                    memoryMap->Clear(pageTable[i].physicalPage);
+                    if (outputUserProg)
+                    {
+                        printf("\nVirtual Page %d Removed", currentThread->getID(), i);
+                    }
+                }
+            }
+            currentThread->Finish();
+        }
     }
 }
 //End code changes by Lucas Blanchard
