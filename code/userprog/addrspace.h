@@ -29,6 +29,10 @@ public:
   ~AddrSpace();                             // De-allocate an address space
 
   //Begin group code changes
+  void PrintSwap();
+
+  void PrintTable();
+
   void loadPage(int vPageNum, unsigned int virtualAddr);
 
   void saveToSwap(int physPageNum);

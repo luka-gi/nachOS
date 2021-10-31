@@ -205,23 +205,24 @@ void ExceptionHandler(ExceptionType which)
 			}
 			delete filename;
 
+			// Calculate needed memory space
+			//Begin group code changes
 			AddrSpace *space;
+			space = new AddrSpace(executable, threadID);
+			delete executable;
 
 			// Do we have enough space?
 			if (!currentThread->killNewChild) // If so...
 			{
 				Thread *execThread = new Thread("thrad!"); // Make a new thread for the process.
 
-				// Calculate needed memory space
-				//Begin group code changes
+				execThread->space = space;
 				execThread->setID(threadID);
 
-				space = new AddrSpace(executable, threadID);
-				delete executable;
 				//End group code changes
 
-				execThread->space = space; // Set the address space to the new space.
-										   // Set the unique thread ID
+				// Set the address space to the new space.
+				// Set the unique thread ID
 				activeThreads->Append(execThread);
 
 				// Put it on the active list.
@@ -231,7 +232,6 @@ void ExceptionHandler(ExceptionType which)
 			}
 			else // If not...
 			{
-				delete executable;
 				machine->WriteRegister(2, -1 * (threadID + 1)); // Return an error code
 				currentThread->killNewChild = false;			// Reset our variable
 			}
