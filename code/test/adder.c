@@ -1,6 +1,6 @@
 #include "syscall.h"
 
-#define loops 2000
+#define loops 10
 
 int main()
 {
@@ -13,10 +13,11 @@ int main()
 		{
 			Write("\n1st loop!\n\n", 20, ConsoleOutput);
 		}
-		if (1999 == i)
+		if (9 == i)
 		{
 			Write("\n10th loop!\n\n", 20, ConsoleOutput);
 		}
 	}
 	Write("\nAdding Complete1!1\n", 20, ConsoleOutput);
+Exit(x);
 }

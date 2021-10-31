@@ -28,9 +28,15 @@ public:
                                             // stored in the file "executable"
   ~AddrSpace();                             // De-allocate an address space
 
-  //Begin code changes by Lucas Blanchard
+  //Begin group code changes
+  void PrintSwap();
+
+  void PrintTable();
+
   void loadPage(int vPageNum, unsigned int virtualAddr);
-  //End code changes by Lucas Blanchard
+
+  void saveToSwap(int physPageNum);
+  //End group code changes
 
   void InitRegisters(); // Initialize user-level CPU registers,
                         // before jumping to user code
@@ -45,6 +51,7 @@ private:
   NoffHeader noffH;
   OpenFile *swap;
   char *swapName;
+  int PID;
   //End code changes by Lucas Blanchard
   TranslationEntry *pageTable; // Assume linear page table translation
                                // for now!
