@@ -103,6 +103,8 @@ AddrSpace::AddrSpace(OpenFile *executable, int PID)
         //End group code changes
 
         size = numPages * PageSize;
+
+        printf("\n.\n.\n.\n.\nI AM PID %d\n.\n.\n.\n.\n.\n.", PID);
         // check we're not trying
         // to run anything too big --
         // at least until we have
@@ -180,7 +182,6 @@ AddrSpace::~AddrSpace()
         {
             int physPageNum = pageTable[i].physicalPage;
             memoryMap->Clear(physPageNum);
-            IPT[physPageNum] = NULL;
         }
     }
     delete pageTable;
