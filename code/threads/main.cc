@@ -110,6 +110,7 @@ int main(int argc, char **argv)
 					{
 						outputUserProg = TRUE;
 					}
+					//begin code changes by Alexander Mayer
 					//first argument is V
 					if (argc > 3)
 					{
@@ -146,6 +147,7 @@ int main(int argc, char **argv)
 						}
 					}
 				}
+				//End code changes by Alexander Mayer
 
 				printf("\nNumber of physical pages: %d\nPage size: %d", NumPhysPages, PageSize);
 
@@ -230,8 +232,8 @@ int main(int argc, char **argv)
 		{
 			ASSERT(argc > 1);
 			Delay(2); // delay for 2 seconds
-				// to give the user time to
-				// start up another nachos
+					  // to give the user time to
+					  // start up another nachos
 			MailTest(atoi(*(argv + 1)));
 			argCount = 2;
 		}
