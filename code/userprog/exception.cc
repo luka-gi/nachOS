@@ -127,11 +127,6 @@ void ExceptionHandler(ExceptionType which)
 			printf("SYSTEM CALL: Halt, called by thread %i.\n", currentThread->getID());
 			DEBUG('t', "Shutdown, initiated by user program.\n");
 
-			//Begin code changes by Lucas Blanchard
-			if (currentThread->space) // Delete the used memory from the process.
-				delete currentThread->space;
-			//End code changes by Lucas Blanchard
-
 			interrupt->Halt();
 			break;
 

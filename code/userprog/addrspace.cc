@@ -104,7 +104,6 @@ AddrSpace::AddrSpace(OpenFile *executable, int PID)
 
         size = numPages * PageSize;
 
-        printf("\n.\n.\n.\n.\nI AM PID %d\n.\n.\n.\n.\n.\n.", PID);
         // check we're not trying
         // to run anything too big --
         // at least until we have
@@ -132,8 +131,6 @@ AddrSpace::AddrSpace(OpenFile *executable, int PID)
                                            // a separate page, we could set its
                                            // pages to be read-only
         }
-
-        memoryMap->Print();
 
         //PrintSwap();
         //show current memory map bits that are taken up
@@ -173,7 +170,7 @@ AddrSpace::~AddrSpace()
     //PrintSwap();
     if (outputUserProg)
     {
-        printf("\nProcess %d Pre deallocation", PID);
+        printf("Process %d before deallocation\n", PID);
         memoryMap->Print();
     }
     for (int i = 0; i < numPages; i++)
@@ -191,8 +188,9 @@ AddrSpace::~AddrSpace()
     delete swapName;
     if (outputUserProg)
     {
-        printf("Process %d Post deallocation", PID);
+        printf("\nProcess %d after deallocation\n", PID);
         memoryMap->Print();
+        printf("\n\n");
     }
     //End code changes by Lucas Blanchard
 }
@@ -240,7 +238,7 @@ void AddrSpace::loadPage(int vPageNum, unsigned int virtualAddr)
 
     if (outputUserProg)
     {
-        printf("\nPage fault: Process %d is requesting virtual page %d\n", PID, vPageNum);
+        printf("\nPage fault: Process %d is requesting virtual page %d", PID, vPageNum);
     }
 
     int physPageNum = memoryMap->Find();
@@ -253,6 +251,7 @@ void AddrSpace::loadPage(int vPageNum, unsigned int virtualAddr)
         {
             printf("\nAssigning physical page %d\n", physPageNum);
             memoryMap->Print();
+            printf("\n\n");
         }
         FIFOList->Append((void *)physPageNum);
         IPT[physPageNum] = currentThread;
@@ -271,6 +270,12 @@ void AddrSpace::loadPage(int vPageNum, unsigned int virtualAddr)
         {
             physPageNum = (int)(FIFOList->Remove());
             Thread *threadToKick = IPT[physPageNum];
+
+            if (outputUserProg)
+            {
+                printf("\nSwapping physical page %d from process %d", physPageNum, threadToKick->space->PID);
+            }
+
             threadToKick->space->saveToSwap(physPageNum);
             memoryMap->Mark(physPageNum);
             FIFOList->Append((void *)physPageNum);
@@ -287,9 +292,11 @@ void AddrSpace::loadPage(int vPageNum, unsigned int virtualAddr)
 
             if (outputUserProg)
             {
-                printf("\nSwapping physical page %d from process %d\n", physPageNum, threadToKick->space->PID);
+                printf("Virtual page %d added\n", vPageNum);
                 memoryMap->Print();
+                printf("\n\n");
             }
+
             //machine->PrintMemory();
         }
         else if (replacementType == 2)
@@ -297,28 +304,34 @@ void AddrSpace::loadPage(int vPageNum, unsigned int virtualAddr)
             physPageNum = Random() % (NumPhysPages);
 
             Thread *threadToKick = IPT[physPageNum];
+
+            if (outputUserProg)
+            {
+                printf("\nSwapping physical page %d from process %d", physPageNum, threadToKick->space->PID);
+            }
+
             threadToKick->space->saveToSwap(physPageNum);
             memoryMap->Mark(physPageNum);
-
-            IPT[physPageNum] = currentThread;
-
-            pageTable[vPageNum].physicalPage = physPageNum;
-            pageTable[vPageNum].valid = TRUE;
 
             //print statement for debugging
             //printf("\nppn: %d\nvpn: %d\npageSize: %d\nvaddr: %d\nnoffset: %d\ninstroff: %d\n", physPageNum, vPageNum, PageSize, virtualAddr, noffH.code.inFileAddr, offset);
 
             swap->ReadAt(&(machine->mainMemory[physPageNum * PageSize]), PageSize, vPageNum * PageSize);
+            IPT[physPageNum] = currentThread;
+
+            pageTable[vPageNum].physicalPage = physPageNum;
+            pageTable[vPageNum].valid = TRUE;
 
             if (outputUserProg)
             {
-                printf("\nSwapping physical page %d from process %d\n", physPageNum, threadToKick->space->PID);
+                printf("Virtual page %d added\n", vPageNum);
                 memoryMap->Print();
+                printf("\n\n");
             }
         }
         else
         {
-            printf("\nCurrently there are not enough free frames. Terminating process %d\n", currentThread->getID());
+            printf("\nERROR: not enough free frames. Terminating process %d", currentThread->getID());
             for (int i = 0; i < numPages; i++)
             {
                 if (pageTable[i].valid)
@@ -326,10 +339,12 @@ void AddrSpace::loadPage(int vPageNum, unsigned int virtualAddr)
                     memoryMap->Clear(pageTable[i].physicalPage);
                     if (outputUserProg)
                     {
-                        printf("\nVirtual Page %d Removed\n", i);
+                        printf("\nVirtual Page %d removed", i);
                     }
                 }
             }
+            fileSystem->Remove(swapName);
+            printf("\n\n");
             currentThread->Finish();
         }
     }
@@ -350,8 +365,9 @@ void AddrSpace::saveToSwap(int physPageNum)
             memoryMap->Clear(physPageNum);
             if (outputUserProg)
             {
-                printf("\nMoved VP %d to swap from PP %d\n", i, physPageNum);
+                printf("\nVirtual page %d removed\n", i);
                 memoryMap->Print();
+                printf("\n");
             }
         }
         //printf("\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.\n.");
