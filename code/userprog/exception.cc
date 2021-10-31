@@ -348,13 +348,15 @@ void ExceptionHandler(ExceptionType which)
 		//signal page fault occurrence
 
 		stats->numPageFaults++;
-		//find virtual address of process
+		//return virtual address of process
 		unsigned int virtualAddr;
 		virtualAddr = machine->ReadRegister(BadVAddrReg);
 
+		//calculate virtual page number
 		int vPageNum;
 		vPageNum = virtualAddr / PageSize;
 
+		//call loadpage function on each pagefaultexception
 		currentThread->space->loadPage(vPageNum, virtualAddr);
 
 		break;

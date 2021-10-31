@@ -32,7 +32,9 @@ void StartProcess(char *filename)
         return;
     }
 
+    //begin group changes
     space = new AddrSpace(executable, 0);
+    //end group changes
     currentThread->space = space;
 
     delete executable;
